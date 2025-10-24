@@ -34,3 +34,12 @@ This will include all prototype revisions
 This folder will contain .txt files with installation guides and important info
 for installation with different OS's and builds 
 
+
+# How to load GNU 
+
+
+[https://wiki.gnuradio.org/index.php/InstallingGR] (Check this for installation guides)
+
+Make sure each Rx and Tx .grc files are opened in the GNU radio companion with the open file/folder buttons on the top right of the IDE 
+
+
