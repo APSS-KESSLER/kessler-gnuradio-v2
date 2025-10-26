@@ -45,6 +45,20 @@ makepkg -si
 ```
 
 
+## Debian
+
+### Install
+`sudo apt install gnuradio`
+
+## Fedora/RHEL
+
+### Install
+```bash
+sudo dnf install gnuradio
+# OR
+sudo yum install gnuradio
+```
+
 ## Import YML files for GRC
 
 We use custom blocks in our GRC and as a result, there are certain blocks that the user needs to import for GRC usage.
