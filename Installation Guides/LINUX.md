@@ -3,6 +3,14 @@ This guide will help you install all the dependencies for this project
 
 There will be an install script that will run the following commands for your distribution, no huss, no fuss.
 
+*It is not an unattended install however*
+
+This script is only supported on:
+- Arch Linux
+- Debian
+- Ubuntu
+- Fedora
+
 **WARNING**
 
 Do not blindly run scripts, we are not responsible for any breakage of the system.
