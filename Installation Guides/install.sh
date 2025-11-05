@@ -2,12 +2,12 @@
 
 # Only using the populer distrobutions
 # If you are not using any of these, then you are smart enough to get these dependancies. 
-readonly arch="Arch Linux"
-readonly fedora="Fedora"
-readonly debian="Debian"
-readonly ubuntu="Ubuntu"
+readonly arch="arch"
+readonly fedora="fedora"
+readonly debian="debian"
+readonly ubuntu="ubuntu"
 
-readonly os_name=$(cat /etc/os-release | grep -w NAME= | awk -F'"' '{print $2}')
+readonly os_name=$(cat /etc/os-release | grep -w ID | awk -F = '{print $2}')
 
 if [$? -ne 0]; then
     echo "Unexpected error, exiting..."
@@ -28,6 +28,7 @@ if [[ $os_name == $arch ]]; then
         sudo pacman -S python gnuradio gnuradio-companion gnuradio-osmodr soapyrtlsdr git
         if [$? -ne 0]; then
             echo "Failed to install dependancies, exiting"
+            exit 1
         fi
         cd ..
         git clone https://aur.archlinux.org/gr-satellites.git
