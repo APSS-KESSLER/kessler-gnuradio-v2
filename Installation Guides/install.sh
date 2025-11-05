@@ -14,9 +14,37 @@ if [$? -ne 0]; then
     exit 1
 fi
 
+read -p "RECOMMENDED: Do you want to use conda [Yn]: " conda
+conda=${conda:-Y}
+if [[ $conda="Y" ]]; then
+    echo "Installing conda"
+    if [[ $(arch)="aarch64" ]]; then
+        wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh
+        chmod +x ./Miniconda3-latest-Linux-aarch64.sh
+        ./Miniconda3-latest-Linux-aarch64.sh
+    elif [[ $(arch)="x86_64" ]]; then
+        wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+        chmod +x ./Miniconda3-latest-Linux-x86_64.sh
+        ./Miniconda3-latest-Linux-x86_64.sh
+    else
+        echo "Cannot detect architecture, exiting."
+        exit 1
+    fi
+    conda activate base
+    conda config --env --add channels conda-forge
+    conda config --env --set channel_priority strict
+    conda install gnuradio gnuradio-satellites rtl-sdr soapysdr-module-rtlsdr
+    echo "Everything is installed :D"
+    exit 0
+fi
+
+
+
+echo "Installing via system packages..."
+
 if [[ $os_name == $arch ]]; then
     while true; do
-        read -p "This will install system wide python packages, do you want to continue? [yN]"
+        read -p "(Arch Linux) This will install system wide python packages, do you want to continue? [yN]" yn
         case "$yn" in 
             [Yy]* ) break;;
             * ) echo "Exiting. Use conda install instead"; exit 1;;
