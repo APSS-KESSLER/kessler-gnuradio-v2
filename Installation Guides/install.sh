@@ -9,20 +9,20 @@ readonly ubuntu="ubuntu"
 
 readonly os_name=$(cat /etc/os-release | grep -w ID | awk -F = '{print $2}')
 
-if [$? -ne 0]; then
+if [ $? -ne 0 ]; then
     echo "Unexpected error, exiting..."
     exit 1
 fi
 
-read -p "RECOMMENDED: Do you want to use conda [Yn]: " conda
-conda=${conda:-Y}
-if [[ $conda="Y" ]]; then
+read -r -p "RECOMMENDED: Do you want to use conda [Yn]: " conda
+conda=${conda,,}
+if [[ "$conda" =~ ^([yes|y])$ ]]; then
     echo "Installing conda"
-    if [[ $(arch)="aarch64" ]]; then
+    if [[ "$(arch)" == "aarch64" ]]; then                                                              
         wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh
         chmod +x ./Miniconda3-latest-Linux-aarch64.sh
         ./Miniconda3-latest-Linux-aarch64.sh
-    elif [[ $(arch)="x86_64" ]]; then
+    elif [[ "$(arch)" == "x86_64" ]]; then
         wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
         chmod +x ./Miniconda3-latest-Linux-x86_64.sh
         ./Miniconda3-latest-Linux-x86_64.sh
@@ -30,11 +30,11 @@ if [[ $conda="Y" ]]; then
         echo "Cannot detect architecture, exiting."
         exit 1
     fi
-    conda activate base
-    conda config --env --add channels conda-forge
-    conda config --env --set channel_priority strict
-    conda install gnuradio gnuradio-satellites rtl-sdr soapysdr-module-rtlsdr
-    echo "Everything is installed :D"
+    echo "Conda is installed"
+    echo "Please execute the second script in depend_scripts: after_conda.sh"
+    echo "Ensure you execute the following before execution"
+    echo "eval \"\$(/home/paul/miniconda3/bin/conda shell.bash hook)\" "
+    rm Mini*
     exit 0
 fi
 
@@ -76,6 +76,3 @@ if [[ $os_name == $arch ]]; then
 fi
 echo "All dependancies have been installed :D"
 exit 0
-
-
-
