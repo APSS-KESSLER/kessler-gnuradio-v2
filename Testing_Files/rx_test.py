@@ -1,11 +1,11 @@
-"""The entrypoint for endurostack."""
+"""Test file for Rx side processing"""
 
 import binascii
 import re
 import socket
 import time
 
-UDP_PORT = 2000
+UDP_PORT = 2001
 UDP_IP = "127.0.0.1"
 
 
@@ -17,20 +17,12 @@ def main() -> None:
 
     udp_socket.connect((UDP_IP, UDP_PORT))
     while True:
-        time.sleep(0.5)
+        data, addr = udp_socket.recvfrom(1024)
 
-        message = "Hello! This is a test"
-        message = message.encode("utf-8")
-        data = gen_packet(message)
-        print(f"Generated packet: {data}")
-        # data = b"Hello, this is a test message!"
-        udp_socket.send(data)
-        # tcp_socket.sendto(data, (ADDR, PORT))
-        print("== SENDING")
-        hexstr = binascii.hexlify(data)
-        hexstr = b" ".join(hexstr[i : i + 2] for i in range(0, len(hexstr), 2))
-        text = re.sub(r"[^a-zA-Z]+".encode(), b".", data)
-        print(f"{hexstr} \t {text.decode()}")
+        if not data:
+            break
+        message = data.decode("utf-8")
+        print(f"recieved: {message} from: {addr}")
 
 
 def _generate_crc16_table(poly: int) -> list[int]:
@@ -74,6 +66,11 @@ def gen_packet(data: bytes) -> bytes:
     """Gen packet."""
     frame = bytes([len(data), *data])
     return b"\xaa" * 5 + b"\x7e" + frame + crc16(frame).to_bytes(2, "big")
+
+
+def decode_packet(data: bytes) -> bytes:
+    data = 
+    return data
 
 
 if __name__ == "__main__":
