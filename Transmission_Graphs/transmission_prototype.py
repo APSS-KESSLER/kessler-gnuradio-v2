@@ -5,8 +5,8 @@
 # SPDX-License-Identifier: GPL-3.0
 #
 # GNU Radio Python Flow Graph
-# Title: Not titled yet
-# Author: Lenovo
+# Title: Tx
+# Author: Orb Ops APSS
 # GNU Radio version: 3.10.12.0
 
 from PyQt5 import Qt
@@ -34,9 +34,9 @@ import threading
 class transmission_prototype(gr.top_block, Qt.QWidget):
 
     def __init__(self, baud_rate=9600):
-        gr.top_block.__init__(self, "Not titled yet", catch_exceptions=True)
+        gr.top_block.__init__(self, "Tx", catch_exceptions=True)
         Qt.QWidget.__init__(self)
-        self.setWindowTitle("Not titled yet")
+        self.setWindowTitle("Tx")
         qtgui.util.check_set_qss()
         try:
             self.setWindowIcon(Qt.QIcon.fromTheme('gnuradio-grc'))

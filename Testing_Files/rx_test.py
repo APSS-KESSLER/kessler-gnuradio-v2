@@ -1,12 +1,13 @@
 """Test file for Rx side processing"""
 
-import binascii
-import re
 import socket
-import time
 
 UDP_PORT = 2001
 UDP_IP = "127.0.0.1"
+
+# From ES UHF II USER MANUAL 2023
+UHF_PRE_PAYLOAD = 7  # Preamble + Sync + Payload Length
+UHF_POST_PAYLOAD = -2  # CRC
 
 
 def main() -> None:
@@ -15,14 +16,13 @@ def main() -> None:
     udp_socket.bind(("", UDP_PORT))
     print(f"UDP server listening on port {UDP_PORT}")
 
-    udp_socket.connect((UDP_IP, UDP_PORT))
     while True:
         data, addr = udp_socket.recvfrom(1024)
-
         if not data:
+            print("Null value recieved")
             break
         message = data.decode("utf-8")
-        print(f"recieved: {message} from: {addr}")
+        print(f"RECIEVED: {message} from: {addr}")
 
 
 def _generate_crc16_table(poly: int) -> list[int]:
@@ -69,7 +69,7 @@ def gen_packet(data: bytes) -> bytes:
 
 
 def decode_packet(data: bytes) -> bytes:
-    data = 
+    data = data[7:-2]
     return data
 
 
