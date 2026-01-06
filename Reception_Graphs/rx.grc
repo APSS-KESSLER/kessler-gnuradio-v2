@@ -146,7 +146,7 @@ blocks:
     bus_structure: null
     coordinate: [1256, 248.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: digital_gfsk_demod_0
   id: digital_gfsk_demod
   parameters:
@@ -169,7 +169,7 @@ blocks:
     bus_structure: null
     coordinate: [768, 192.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: digital_symbol_sync_xx_0
   id: digital_symbol_sync_xx
   parameters:
@@ -220,7 +220,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     mtu: '10000'
-    port: '2000'
+    port: '2001'
     tcp_no_delay: 'False'
     type: UDP_CLIENT
   states:
@@ -388,7 +388,7 @@ blocks:
     bus_structure: null
     coordinate: [1032, 372.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: soapy_rtlsdr_source_0
   id: soapy_rtlsdr_source
   parameters:
