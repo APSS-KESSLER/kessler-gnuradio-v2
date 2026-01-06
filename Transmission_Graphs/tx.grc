@@ -1,6 +1,6 @@
 options:
   parameters:
-    author: Lenovo
+    author: Orb Ops APSS
     catch_exceptions: 'True'
     category: '[GRC Hier Blocks]'
     cmake_opt: ''
@@ -22,7 +22,7 @@ options:
     run_options: prompt
     sizing_mode: fixed
     thread_safe_setters: ''
-    title: Not titled yet
+    title: Tx
     window_size: (1000,1000)
   states:
     bus_sink: false
@@ -42,7 +42,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [728, 20.0]
+    coordinate: [736, 12.0]
     rotation: 0
     state: enabled
 - name: mod_index
@@ -54,7 +54,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [440, 52.0]
+    coordinate: [440, 12.0]
     rotation: 0
     state: enabled
 - name: num_preamble_aa
@@ -66,7 +66,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [408, 364.0]
+    coordinate: [560, 12.0]
     rotation: 0
     state: enabled
 - name: samp_rate
@@ -78,7 +78,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [200, 12]
+    coordinate: [200, 12.0]
     rotation: 0
     state: enabled
 - name: sensitivity
@@ -90,7 +90,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [304, 44.0]
+    coordinate: [312, 12.0]
     rotation: 0
     state: enabled
 - name: baud_rate
@@ -107,7 +107,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [216, 124.0]
+    coordinate: [200, 116.0]
     rotation: 0
     state: enabled
 - name: blocks_message_debug_0
@@ -122,7 +122,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [448, 464.0]
+    coordinate: [456, 496.0]
     rotation: 0
     state: enabled
 - name: digital_gfsk_mod_0
@@ -143,7 +143,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [808, 100.0]
+    coordinate: [720, 364.0]
     rotation: 0
     state: enabled
 - name: import_0
@@ -156,7 +156,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [552, 48.0]
+    coordinate: [320, 152.0]
     rotation: 0
     state: enabled
 - name: network_socket_pdu_0_0
@@ -176,7 +176,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [56, 476.0]
+    coordinate: [192, 356.0]
     rotation: 0
     state: enabled
 - name: pdu_pdu_to_stream_x_0
@@ -194,7 +194,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [912, 384.0]
+    coordinate: [456, 384.0]
     rotation: 0
     state: enabled
 - name: qtgui_waterfall_sink_x_0
@@ -255,7 +255,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1440, 244.0]
+    coordinate: [968, 484.0]
     rotation: 0
     state: enabled
 - name: soapy_hackrf_sink_0
@@ -275,34 +275,13 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1264, -4.0]
+    coordinate: [968, 388.0]
     rotation: 0
     state: enabled
-- name: soapy_hackrf_sink_1
-  id: soapy_hackrf_sink
-  parameters:
-    affinity: ''
-    alias: ''
-    amp: 'False'
-    bandwidth: '0'
-    center_freq: 435e6
-    comment: ''
-    dev_args: ''
-    samp_rate: samp_rate
-    type: fc32
-    vga: '16'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1136, 260.0]
-    rotation: 0
-    state: disabled
 
 connections:
 - [digital_gfsk_mod_0, '0', qtgui_waterfall_sink_x_0, '0']
 - [digital_gfsk_mod_0, '0', soapy_hackrf_sink_0, '0']
-- [digital_gfsk_mod_0, '0', soapy_hackrf_sink_1, '0']
 - [network_socket_pdu_0_0, pdus, blocks_message_debug_0, print_pdu]
 - [network_socket_pdu_0_0, pdus, pdu_pdu_to_stream_x_0, pdus]
 - [pdu_pdu_to_stream_x_0, '0', digital_gfsk_mod_0, '0']
