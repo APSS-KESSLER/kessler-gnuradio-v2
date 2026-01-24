@@ -96,7 +96,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1456, 812.0]
+    coordinate: [1232, 620.0]
     rotation: 0
     state: disabled
 - name: blocks_float_to_uchar_0
@@ -114,7 +114,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1240, 660.0]
+    coordinate: [1072, 524.0]
     rotation: 0
     state: disabled
 - name: blocks_message_debug_0
@@ -129,7 +129,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1760, 568.0]
+    coordinate: [1520, 512.0]
     rotation: 0
     state: enabled
 - name: blocks_uchar_to_float_0
@@ -144,7 +144,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1256, 248.0]
+    coordinate: [1064, 248.0]
     rotation: 0
     state: disabled
 - name: digital_gfsk_demod_0
@@ -167,7 +167,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [768, 192.0]
+    coordinate: [816, 192.0]
     rotation: 0
     state: disabled
 - name: digital_symbol_sync_xx_0
@@ -194,7 +194,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [384, 380.0]
+    coordinate: [432, 380.0]
     rotation: 0
     state: enabled
 - name: import_0
@@ -227,7 +227,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1768, 364.0]
+    coordinate: [1544, 372.0]
     rotation: 0
     state: enabled
 - name: qtgui_waterfall_sink_x_0
@@ -349,7 +349,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1752, 116.0]
+    coordinate: [1480, 220.0]
     rotation: 0
     state: enabled
 - name: satellites_endurosat_deframer_0
@@ -366,7 +366,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1456, 392.0]
+    coordinate: [1256, 400.0]
     rotation: 0
     state: enabled
 - name: satellites_fsk_demodulator_0
@@ -386,7 +386,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1032, 372.0]
+    coordinate: [840, 380.0]
     rotation: 0
     state: enabled
 - name: soapy_rtlsdr_source_0
