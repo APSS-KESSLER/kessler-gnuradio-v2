@@ -75,8 +75,8 @@ class AsyncUDPManager:
         self._rx_sock.setblocking(False)
         self._tx_sock.setblocking(False)
 
-        self._rx_sock.bind(("127.0.0.2", self.rx_port))
-        print(f"UDP RX on 127.0.0.2:{self.rx_port}")
+        self._rx_sock.bind(("127.0.0.1", self.rx_port))
+        print(f"UDP RX on 127.0.0.1:{self.rx_port}")
         tx_ip, tx_port = self.tx_addr
         print(f"UDP TX on {tx_ip}:{tx_port}")
 
@@ -186,22 +186,30 @@ async def rx_consumer(phy: AsyncUDPManager):
         print(f"Received: {data!r}")
 
 
-async def tx_producer(phy: AsyncUDPManager, interval: float = 1):
+async def tx_producer(phy: AsyncUDPManager, interval: float = 2):
     while True:
         payload = "hi"
         await phy.write(payload)
         await asyncio.sleep(interval)
 
 
-async def main():
-    phy = AsyncUDPManager()
+async def main(rx_port: int, tx_addr: tuple[str, int], *, send: bool) -> None:
+    phy = AsyncUDPManager(rx_port=rx_port, tx_addr=tx_addr)
     await phy.initialize()
 
-    asyncio.create_task(tx_producer(phy))
-    asyncio.create_task(rx_consumer(phy))
+    if send:
+        asyncio.create_task(tx_producer(phy))
+    else:
+        asyncio.create_task(rx_consumer(phy))
 
     await asyncio.Event().wait()
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--rx-port", type=int)
+    parser.add_argument("--tx-port", type=int)
+    parser.add_argument("--send", action="store_true", default=False)
+    parser.add_argument("--tx-ip", type=str, default="127.0.0.1")
+    args = parser.parse_args()
+    asyncio.run(main(args.rx_port, (args.tx_ip, args.tx_port), send=args.send))

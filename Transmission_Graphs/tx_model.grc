@@ -1177,7 +1177,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [2240, 328.0]
+    coordinate: [2192, 328.0]
     rotation: 0
     state: enabled
 - name: satellites_endurosat_deframer_0_0
@@ -1234,7 +1234,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1744, 900.0]
+    coordinate: [1736, 900.0]
     rotation: 0
     state: enabled
 
