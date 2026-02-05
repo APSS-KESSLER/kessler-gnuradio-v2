@@ -18,6 +18,7 @@ UHF_POST_PAYLOAD = -2  # CRC
 RX_PORT = 2001
 TX_PORT = 2000
 TX_ADDR = "127.0.0.2"
+RX_ADDR = "127.0.0.1"
 
 AIRMAC_PROTOCOL_ID = b"\x01"
 RADIO_MODULE_ADDRESS = b"\x11"
@@ -51,7 +52,7 @@ class AsyncUDPManager:
         self,
         local_addr=("0.0.0.0", 0),
         tx_addr=(TX_ADDR, TX_PORT),
-        rx_port=RX_PORT,
+        rx_port=(RX_ADDR, RX_PORT),
     ):
         self.local_addr = local_addr
         self.tx_addr = tx_addr
@@ -75,7 +76,9 @@ class AsyncUDPManager:
         self._rx_sock.setblocking(False)
         self._tx_sock.setblocking(False)
 
-        self._rx_sock.bind(("127.0.0.1", self.rx_port))
+        print(f"rx_port: {self.rx_port}")
+        rx_addr, rx_port = self.rx_port
+        self._rx_sock.bind((rx_addr, rx_port))
         print(f"UDP RX on 127.0.0.1:{self.rx_port}")
         tx_ip, tx_port = self.tx_addr
         print(f"UDP TX on {tx_ip}:{tx_port}")
@@ -96,7 +99,7 @@ class AsyncUDPManager:
         while True:
             try:
                 data, addr = await asyncio.wait_for(
-                    self.loop.sock_recvfrom(self._rx_sock, 65535), timeout=1
+                    self.loop.sock_recvfrom(self._rx_sock, 65535), timeout=6
                 )
 
                 await self.read_queue.put(data)
@@ -174,7 +177,7 @@ def gen_packet(data: str | bytes) -> bytes:
         frame = bytes([len(data), *data])
 
     else:
-        frame = bytes([len(data)]) + data
+        frame = bytes([len(data), *data])
     print(f"crc 16: {crc16(frame).to_bytes(2, 'big')}")
     hexdump(frame)
     return b"\xaa" * 5 + b"\x7e" + frame + crc16(frame).to_bytes(2, "big")
@@ -184,23 +187,66 @@ async def rx_consumer(phy: AsyncUDPManager):
     while True:
         data = await phy.read()
         print(f"Received: {data!r}")
+        await phy.write("pong")
 
 
-async def tx_producer(phy: AsyncUDPManager, interval: float = 2):
+async def tx_initial(phy: AsyncUDPManager, interval: float = 2):
+    payload = "hi"
+    await phy.write(payload)
+    await asyncio.sleep(interval)
+
+
+async def tx_triage(phy: AsyncUDPManager, interval: float = 2):
+    payload = "oh hi"
+    await phy.write(payload)
+    await asyncio.sleep(interval)
+
+
+async def tx_response(phy: AsyncUDPManager, interval: float = 2):
+    payload = "wasg"
+    await phy.write(payload)
+    await asyncio.sleep(interval)
+
+
+async def mac_task(phy):
     while True:
-        payload = "hi"
-        await phy.write(payload)
-        await asyncio.sleep(interval)
+        frame = await phy.read()
+
+        # decide what to do
+        print(f"frame: {frame}")
+        if frame == b"\x02hi":
+            await phy.write("oh hi")
+
+        elif frame == b"\x05oh hi":
+            await phy.write("wasg")
+        elif frame == b"\x08\x08\x08\x08\x08\x08\x08\x08\x08\x08\x08\x08":
+            print("AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
 
 
-async def main(rx_port: int, tx_addr: tuple[str, int], *, send: bool) -> None:
+async def mac_beacon(phy):
+    while True:
+        await phy.write(b"\x08")
+        await asyncio.sleep(1)
+
+
+async def main(
+    rx_port: tuple[str, int], tx_addr: tuple[str, int], *, send: bool
+) -> None:
     phy = AsyncUDPManager(rx_port=rx_port, tx_addr=tx_addr)
     await phy.initialize()
 
     if send:
-        asyncio.create_task(tx_producer(phy))
+        # asyncio.create_task(mac_beacon(phy))
+        await asyncio.create_task(mac_beacon(phy))
+
     else:
-        asyncio.create_task(rx_consumer(phy))
+        await asyncio.sleep(3)
+        frame = await phy.read()
+
+        # decide what to do
+        print(f"frame: {frame}")
+
+    # asyncio.create_task(mac_task(phy))
 
     await asyncio.Event().wait()
 
@@ -211,5 +257,8 @@ if __name__ == "__main__":
     parser.add_argument("--tx-port", type=int)
     parser.add_argument("--send", action="store_true", default=False)
     parser.add_argument("--tx-ip", type=str, default="127.0.0.1")
+    parser.add_argument("--rx-ip", type=str, default="127.0.0.2")
     args = parser.parse_args()
-    asyncio.run(main(args.rx_port, (args.tx_ip, args.tx_port), send=args.send))
+    asyncio.run(
+        main((args.rx_ip, args.rx_port), (args.tx_ip, args.tx_port), send=args.send)
+    )
