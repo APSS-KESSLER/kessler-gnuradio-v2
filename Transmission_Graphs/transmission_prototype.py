@@ -81,6 +81,10 @@ class transmission_prototype(gr.top_block, Qt.QWidget):
         self.freq_deviation = freq_deviation = (mod_index * baud_rate) / 2
         self.sensitivity = sensitivity = (2 * math.pi * freq_deviation) / samp_rate
         self.num_preamble_aa = num_preamble_aa = 5
+        self.TX_GS_PORT = TX_GS_PORT = 2000
+        self.RX_GS_PORT = RX_GS_PORT = 2001
+        self.OBC_TX_PORT = OBC_TX_PORT = 2002
+        self.OBC_RX_PORT = OBC_RX_PORT = 2003
 
         ##################################################
         # Blocks
@@ -376,10 +380,10 @@ class transmission_prototype(gr.top_block, Qt.QWidget):
         self.top_layout.addWidget(self._qtgui_waterfall_sink_x_0_win)
         self.pdu_pdu_to_stream_x_0_0 = pdu.pdu_to_stream_b(pdu.EARLY_BURST_BALK, 64)
         self.pdu_pdu_to_stream_x_0 = pdu.pdu_to_stream_b(pdu.EARLY_BURST_BALK, 64)
-        self.network_socket_pdu_1 = network.socket_pdu('UDP_CLIENT', "127.0.0.2", '50247', 10000, False)
-        self.network_socket_pdu_0_1 = network.socket_pdu('UDP_CLIENT', '127.0.0.1', '50249', 10000, False)
-        self.network_socket_pdu_0_0_0 = network.socket_pdu('UDP_SERVER', '127.0.0.1', '50248', 1200, False)
-        self.network_socket_pdu_0 = network.socket_pdu('UDP_SERVER', "127.0.0.1", '50246', 10000, False)
+        self.network_socket_pdu_1 = network.socket_pdu('UDP_CLIENT', "127.0.0.2", '2001', 10000, False)
+        self.network_socket_pdu_0_1 = network.socket_pdu('UDP_CLIENT', '127.0.0.1', '2003', 10000, False)
+        self.network_socket_pdu_0_0_0 = network.socket_pdu('UDP_SERVER', '127.0.0.1', '2002', 1200, False)
+        self.network_socket_pdu_0 = network.socket_pdu('UDP_SERVER', "127.0.0.2", '2000', 10000, False)
         self.digital_symbol_sync_xx_0_0 = digital.symbol_sync_cc(
             digital.TED_MUELLER_AND_MULLER,
             (samp_rate/baud_rate),
@@ -534,6 +538,30 @@ class transmission_prototype(gr.top_block, Qt.QWidget):
 
     def set_num_preamble_aa(self, num_preamble_aa):
         self.num_preamble_aa = num_preamble_aa
+
+    def get_TX_GS_PORT(self):
+        return self.TX_GS_PORT
+
+    def set_TX_GS_PORT(self, TX_GS_PORT):
+        self.TX_GS_PORT = TX_GS_PORT
+
+    def get_RX_GS_PORT(self):
+        return self.RX_GS_PORT
+
+    def set_RX_GS_PORT(self, RX_GS_PORT):
+        self.RX_GS_PORT = RX_GS_PORT
+
+    def get_OBC_TX_PORT(self):
+        return self.OBC_TX_PORT
+
+    def set_OBC_TX_PORT(self, OBC_TX_PORT):
+        self.OBC_TX_PORT = OBC_TX_PORT
+
+    def get_OBC_RX_PORT(self):
+        return self.OBC_RX_PORT
+
+    def set_OBC_RX_PORT(self, OBC_RX_PORT):
+        self.OBC_RX_PORT = OBC_RX_PORT
 
 
 

@@ -15,9 +15,35 @@ import time
 UHF_PRE_PAYLOAD = 7  # Preamble + Sync + Payload Length
 UHF_POST_PAYLOAD = -2  # CRC
 
-RX_PORT = 2003
-TX_PORT = 2001
-TX_ADDR = "127.0.0.1"
+RX_PORT = 2001
+TX_PORT = 2000
+TX_ADDR = "127.0.0.2"
+
+AIRMAC_PROTOCOL_ID = b"\x01"
+RADIO_MODULE_ADDRESS = b"\x11"
+PAYLOAD_AND_HEADER = b"\x26"
+HEADER_CRC = b"\x4a\x8f"
+
+
+CUBESAT_ID = b"\x11\x00\x00\x00\x00\x00\x00\x00"
+GS_ID = b"\x00\x00\x00\x00\x00\x00\x00\x00"
+CAPABILITY_FLAGS = b"\x00\x00\x00\x00\x00\x00\x00\x00"
+SESSION_ID = b"\x01\x00\x00\x00\x00\x00\x00\x00"
+AIRMAC_PROTOCOL_VERSION = b"\x01\x00"
+
+CRC_32 = b"\x3d\x90\x20\x8f"
+
+PAYLOAD_BYTES = (
+    AIRMAC_PROTOCOL_ID
+    + RADIO_MODULE_ADDRESS
+    + PAYLOAD_AND_HEADER
+    + HEADER_CRC
+    + CUBESAT_ID
+    + GS_ID
+    + CAPABILITY_FLAGS
+    + SESSION_ID
+    + AIRMAC_PROTOCOL_VERSION
+)
 
 
 class AsyncUDPManager:
@@ -34,7 +60,7 @@ class AsyncUDPManager:
         self._rx_sock: Optional[socket.socket] = None
         self.loop = None
 
-        self._read_queue = asyncio.Queue()
+        self.read_queue = asyncio.Queue()
         self.write_queue = asyncio.Queue()
 
         self._tx_task = None
@@ -63,20 +89,22 @@ class AsyncUDPManager:
 
             if data is not None:
                 await self.loop.sock_sendto(self._tx_sock, data, self.tx_addr)
-                print(f"PHY: TX COMPLETED, sent: {data}")
+                print(f"TX COMPLETED, sent {data}")
                 await asyncio.sleep(0.1)
 
     async def _rx_loop(self):
         while True:
             try:
                 data, addr = await asyncio.wait_for(
-                    self.loop.sock_recvfrom(self._rx_sock, 65535), timeout=0.1
+                    self.loop.sock_recvfrom(self._rx_sock, 65535), timeout=1
                 )
 
-                await self._read_queue.put(data)
+                await self.read_queue.put(data)
                 hexdump(data)
             except asyncio.TimeoutError:
-                print("PHY: TIMEOUT ERROR WAITING ON RX")
+                print(
+                    "#######################################################TIMEOUT ERROR WAITING FOR PING"
+                )
                 continue
             except Exception as e:
                 print(f"Read error: {e}")
@@ -84,11 +112,13 @@ class AsyncUDPManager:
 
     async def write(self, data):
         await self.write_queue.put(gen_packet(data))
-        print("PHY: SUCCESSFUL WRITE TO QUEUE FROM AIRMAC")
+        print("Successful Write to Queue from Airmac")
 
     async def read(self):
-        data = await self._read_queue.get()
-        print("PHY: SUCCESSFUL READ FROM QUEUE")
+        data = await self.read_queue.get()
+        print(
+            "#####################################################Retrieved data from Queue, pumping to Airmac. Recieved:"
+        )
         hexdump(data)
         return data
 
@@ -141,12 +171,13 @@ def gen_packet(data: str | bytes) -> bytes:
     """Gen packet."""
     if isinstance(data, str):
         data = data.encode()
+        frame = bytes([len(data), *data])
 
-    frame = bytes([len(data), *data])
+    else:
+        frame = bytes([len(data)]) + data
+    print(f"crc 16: {crc16(frame).to_bytes(2, 'big')}")
+    hexdump(frame)
     return b"\xaa" * 5 + b"\x7e" + frame + crc16(frame).to_bytes(2, "big")
-
-
-# Not needed for the phy layer just for testing purposes
 
 
 async def rx_consumer(phy: AsyncUDPManager):
@@ -155,13 +186,11 @@ async def rx_consumer(phy: AsyncUDPManager):
         print(f"Received: {data!r}")
 
 
-async def tx_producer(phy: AsyncUDPManager, interval: float = 0.1):
+async def tx_producer(phy: AsyncUDPManager, interval: float = 1):
     while True:
-        await phy.write("PONG")
+        payload = "hi"
+        await phy.write(payload)
         await asyncio.sleep(interval)
-
-
-#
 
 
 async def main():
