@@ -33,6 +33,54 @@ options:
     state: enabled
 
 blocks:
+- name: OBC_RX_PORT
+  id: variable
+  parameters:
+    comment: ''
+    value: '2003'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [608, 220.0]
+    rotation: 0
+    state: enabled
+- name: OBC_TX_PORT
+  id: variable
+  parameters:
+    comment: ''
+    value: '2002'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [456, 228.0]
+    rotation: 0
+    state: enabled
+- name: RX_GS_PORT
+  id: variable
+  parameters:
+    comment: ''
+    value: '2001'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [600, 132.0]
+    rotation: 0
+    state: enabled
+- name: TX_GS_PORT
+  id: variable
+  parameters:
+    comment: ''
+    value: '2000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [456, 132.0]
+    rotation: 0
+    state: enabled
 - name: freq_deviation
   id: variable
   parameters:
@@ -517,11 +565,11 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    host: '"127.0.0.1"'
+    host: '"127.0.0.2"'
     maxoutbuf: '0'
     minoutbuf: '0'
     mtu: '10000'
-    port: '50246'
+    port: '2000'
     tcp_no_delay: 'False'
     type: UDP_SERVER
   states:
@@ -541,7 +589,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     mtu: '1200'
-    port: '50248'
+    port: '2002'
     tcp_no_delay: 'False'
     type: UDP_SERVER
   states:
@@ -561,7 +609,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     mtu: '10000'
-    port: '50249'
+    port: '2003'
     tcp_no_delay: 'False'
     type: UDP_CLIENT
   states:
@@ -581,7 +629,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     mtu: '10000'
-    port: '50247'
+    port: '2001'
     tcp_no_delay: 'False'
     type: UDP_CLIENT
   states:
@@ -1186,7 +1234,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1736, 900.0]
+    coordinate: [1744, 900.0]
     rotation: 0
     state: enabled
 
