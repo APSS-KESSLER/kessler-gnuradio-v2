@@ -1214,7 +1214,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1816, 308.0]
+    coordinate: [1824, 308.0]
     rotation: 0
     state: enabled
 - name: satellites_fsk_demodulator_0_0
