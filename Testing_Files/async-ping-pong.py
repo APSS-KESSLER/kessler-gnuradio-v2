@@ -4,10 +4,7 @@ import re
 import asyncio
 import socket
 from typing import Optional
-import zmq
-import zmq.asyncio as zmqasync
-import pmt
-import numpy as np
+
 import time
 
 
@@ -124,6 +121,25 @@ class AsyncUDPManager:
         )
         hexdump(data)
         return data
+    
+    async def shutdown(self):
+        print("Shutting down UDP manager...")
+
+        # Cancel tasks
+        tasks = [self._tx_task, self._rx_task]
+        for t in tasks:
+            if t:
+                t.cancel()
+                try:
+                    await t
+                except asyncio.CancelledError:
+                    pass
+
+        # Close sockets
+        if self._tx_sock:
+            self._tx_sock.close()
+        if self._rx_sock:
+            self._rx_sock.close()
 
 
 def hexdump(data: bytes) -> None:
@@ -208,25 +224,22 @@ async def tx_response(phy: AsyncUDPManager, interval: float = 2):
     await asyncio.sleep(interval)
 
 
-async def mac_task(phy):
+###########################################TESTING FUNCTIONALITY###############################################
+
+async def recieve_task(phy: AsyncUDPManager):
     while True:
         frame = await phy.read()
-
-        # decide what to do
         print(f"frame: {frame}")
-        if frame == b"\x02hi":
-            await phy.write("oh hi")
 
-        elif frame == b"\x05oh hi":
-            await phy.write("wasg")
-        elif frame == b"\x08\x08\x08\x08\x08\x08\x08\x08\x08\x08\x08\x08":
-            print("AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
+        await phy.write(b"\x09")
 
-
-async def mac_beacon(phy):
+async def send_task(phy: AsyncUDPManager):
     while True:
         await phy.write(b"\x08")
-        await asyncio.sleep(1)
+        frame = await phy.read()
+        print(f"frame: {frame}")
+
+##################################################################################################################
 
 
 async def main(
@@ -237,14 +250,12 @@ async def main(
 
     if send:
         # asyncio.create_task(mac_beacon(phy))
-        await asyncio.create_task(mac_beacon(phy))
+        await asyncio.create_task(send_task(phy))
 
     else:
-        await asyncio.sleep(3)
-        frame = await phy.read()
-
-        # decide what to do
-        print(f"frame: {frame}")
+        print("Mac task")
+        await asyncio.create_task(recieve_task(phy))
+    
 
     # asyncio.create_task(mac_task(phy))
 
