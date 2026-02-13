@@ -98,7 +98,7 @@ class transmission_prototype(gr.top_block, Qt.QWidget):
         self.qtgui_waterfall_sink_x_0 = qtgui.waterfall_sink_c(
             1024, #size
             window.WIN_BLACKMAN_hARRIS, #wintype
-            0, #fc
+            435e6, #fc
             samp_rate, #bw
             "", #name
             1, #number of inputs
@@ -131,7 +131,7 @@ class transmission_prototype(gr.top_block, Qt.QWidget):
 
         self.top_layout.addWidget(self._qtgui_waterfall_sink_x_0_win)
         self.pdu_pdu_to_stream_x_0 = pdu.pdu_to_stream_b(pdu.EARLY_BURST_BALK, 64)
-        self.network_socket_pdu_0_0 = network.socket_pdu('UDP_SERVER', '127.0.0.1', '2000', 1200, False)
+        self.network_socket_pdu_0_0 = network.socket_pdu('UDP_SERVER', '127.0.0.2', '2000', 10000, False)
         self.digital_gfsk_mod_0 = digital.gfsk_mod(
             samples_per_symbol=(int(samp_rate // baud_rate)),
             sensitivity=sensitivity,
@@ -180,7 +180,7 @@ class transmission_prototype(gr.top_block, Qt.QWidget):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
         self.set_sensitivity((2 * math.pi * self.freq_deviation) / self.samp_rate)
-        self.qtgui_waterfall_sink_x_0.set_frequency_range(0, self.samp_rate)
+        self.qtgui_waterfall_sink_x_0.set_frequency_range(435e6, self.samp_rate)
         self.soapy_hackrf_sink_0.set_sample_rate(0, self.samp_rate)
 
     def get_freq_deviation(self):
