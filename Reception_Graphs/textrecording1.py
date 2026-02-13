@@ -186,7 +186,7 @@ class textrecording1(gr.top_block, Qt.QWidget):
         self._qtgui_waterfall_sink_x_0_win = sip.wrapinstance(self.qtgui_waterfall_sink_x_0.qwidget(), Qt.QWidget)
 
         self.top_layout.addWidget(self._qtgui_waterfall_sink_x_0_win)
-        self.network_socket_pdu_0 = network.socket_pdu('UDP_CLIENT', '127.0.0.1', '2001', 10000, False)
+        self.network_socket_pdu_0 = network.socket_pdu('UDP_CLIENT', '127.0.0.1', '2003', 10000, False)
         self.digital_symbol_sync_xx_0 = digital.symbol_sync_cc(
             digital.TED_MUELLER_AND_MULLER,
             (samp_rate/baud),
