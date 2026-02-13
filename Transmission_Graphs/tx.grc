@@ -165,10 +165,10 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    host: 127.0.0.1
+    host: 127.0.0.2
     maxoutbuf: '0'
     minoutbuf: '0'
-    mtu: '1200'
+    mtu: '10000'
     port: '2000'
     tcp_no_delay: 'False'
     type: UDP_SERVER
@@ -225,7 +225,7 @@ blocks:
     color8: '0'
     color9: '0'
     comment: ''
-    fc: '0'
+    fc: 435e6
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'False'

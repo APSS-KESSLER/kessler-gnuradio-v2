@@ -105,7 +105,7 @@ class AsyncUDPManager:
                 print(
                     "#######################################################TIMEOUT ERROR WAITING FOR PING"
                 )
-                continue
+                return 
             except Exception as e:
                 print(f"Read error: {e}")
                 break
@@ -236,8 +236,11 @@ async def recieve_task(phy: AsyncUDPManager):
 async def send_task(phy: AsyncUDPManager):
     while True:
         await phy.write(b"\x08")
-        frame = await phy.read()
-        print(f"frame: {frame}")
+        #await phy.write(PAYLOAD_BYTES)
+        print("Trying")
+        await asyncio.sleep(.5)
+        
+        
 
 ##################################################################################################################
 
