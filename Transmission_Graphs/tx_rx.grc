@@ -1,6 +1,6 @@
 options:
   parameters:
-    author: Orb Ops APSS
+    author: flat-sat-workbench
     catch_exceptions: 'True'
     category: '[GRC Hier Blocks]'
     cmake_opt: ''
@@ -11,7 +11,7 @@ options:
     gen_linking: dynamic
     generate_options: qt_gui
     hier_block_src_path: '.:'
-    id: textrecording1
+    id: tx_rx
     max_nouts: '0'
     output_language: python
     placement: (0,0)
@@ -22,7 +22,7 @@ options:
     run_options: prompt
     sizing_mode: fixed
     thread_safe_setters: ''
-    title: Rx
+    title: Not titled yet
     window_size: (1000,1000)
   states:
     bus_sink: false
@@ -33,28 +33,40 @@ options:
     state: enabled
 
 blocks:
-- name: baud
+- name: freq_deviation
   id: variable
   parameters:
     comment: ''
-    value: '9600'
+    value: (mod_index * baud) / 2
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [464, 12.0]
+    coordinate: [704, 12.0]
     rotation: 0
     state: enabled
-- name: fsk_deviation_hz
+- name: mod_index
   id: variable
   parameters:
     comment: ''
-    value: 2.4e3
+    value: '0.5'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [320, 12.0]
+    coordinate: [416, 12.0]
+    rotation: 0
+    state: enabled
+- name: num_preamble_aa
+  id: variable
+  parameters:
+    comment: ''
+    value: '5'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [528, 12.0]
     rotation: 0
     state: enabled
 - name: samp_rate
@@ -66,19 +78,36 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [200, 12]
+    coordinate: [192, 12.0]
     rotation: 0
     state: enabled
-- name: samp_rate_0_0
+- name: sensitivity
   id: variable
   parameters:
     comment: ''
-    value: 2e6
+    value: (2 * math.pi * freq_deviation) / samp_rate
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [48, 172.0]
+    coordinate: [296, 12.0]
+    rotation: 0
+    state: enabled
+- name: baud
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: eng_float
+    value: '9600'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [192, 76.0]
     rotation: 0
     state: enabled
 - name: blocks_file_sink_0
@@ -96,7 +125,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1232, 620.0]
+    coordinate: [1272, 948.0]
     rotation: 0
     state: disabled
 - name: blocks_float_to_uchar_0
@@ -114,7 +143,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1072, 524.0]
+    coordinate: [1112, 860.0]
     rotation: 0
     state: disabled
 - name: blocks_message_debug_0
@@ -129,7 +158,22 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1520, 512.0]
+    coordinate: [376, 384.0]
+    rotation: 0
+    state: disabled
+- name: blocks_message_debug_0_0
+  id: blocks_message_debug
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    en_uvec: 'True'
+    log_level: info
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1560, 840.0]
     rotation: 0
     state: enabled
 - name: blocks_uchar_to_float_0
@@ -144,7 +188,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1064, 248.0]
+    coordinate: [1112, 576.0]
     rotation: 0
     state: disabled
 - name: digital_gfsk_demod_0
@@ -167,9 +211,30 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [816, 192.0]
+    coordinate: [856, 524.0]
     rotation: 0
     state: disabled
+- name: digital_gfsk_mod_0
+  id: digital_gfsk_mod
+  parameters:
+    affinity: ''
+    alias: ''
+    bt: '0.35'
+    comment: ''
+    do_unpack: 'True'
+    log: 'False'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samples_per_symbol: int(samp_rate // baud)
+    sensitivity: sensitivity
+    verbose: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [648, 252.0]
+    rotation: 0
+    state: enabled
 - name: digital_symbol_sync_xx_0
   id: digital_symbol_sync_xx
   parameters:
@@ -194,7 +259,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [432, 380.0]
+    coordinate: [472, 716.0]
     rotation: 0
     state: enabled
 - name: import_0
@@ -207,7 +272,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [920, 48.0]
+    coordinate: [296, 76.0]
     rotation: 0
     state: enabled
 - name: network_socket_pdu_0
@@ -227,10 +292,109 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1544, 372.0]
+    coordinate: [1592, 700.0]
+    rotation: 0
+    state: enabled
+- name: network_socket_pdu_0_0
+  id: network_socket_pdu
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    host: 127.0.0.2
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mtu: '10000'
+    port: '2000'
+    tcp_no_delay: 'False'
+    type: UDP_SERVER
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [120, 244.0]
+    rotation: 0
+    state: enabled
+- name: pdu_pdu_to_stream_x_0
+  id: pdu_pdu_to_stream_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    depth: '64'
+    early_behavior: pdu.EARLY_BURST_BALK
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: byte
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [376, 268.0]
     rotation: 0
     state: enabled
 - name: qtgui_waterfall_sink_x_0
+  id: qtgui_waterfall_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    axislabels: 'True'
+    bw: samp_rate
+    color1: '0'
+    color10: '0'
+    color2: '0'
+    color3: '0'
+    color4: '0'
+    color5: '0'
+    color6: '0'
+    color7: '0'
+    color8: '0'
+    color9: '0'
+    comment: ''
+    fc: 435e6
+    fftsize: '1024'
+    freqhalf: 'True'
+    grid: 'False'
+    gui_hint: ''
+    int_max: '10'
+    int_min: '-140'
+    label1: ''
+    label10: ''
+    label2: ''
+    label3: ''
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    legend: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '""'
+    nconnections: '1'
+    showports: 'False'
+    type: complex
+    update_time: '0.10'
+    wintype: window.WIN_BLACKMAN_hARRIS
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [888, 364.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_waterfall_sink_x_0_0
   id: qtgui_waterfall_sink_x
   parameters:
     affinity: ''
@@ -288,7 +452,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [296, 636.0]
+    coordinate: [344, 972.0]
     rotation: 0
     state: enabled
 - name: qtgui_waterfall_sink_x_2
@@ -349,7 +513,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1480, 220.0]
+    coordinate: [1528, 548.0]
     rotation: 0
     state: enabled
 - name: satellites_endurosat_deframer_0
@@ -366,7 +530,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1256, 400.0]
+    coordinate: [1304, 724.0]
     rotation: 0
     state: enabled
 - name: satellites_fsk_demodulator_0
@@ -386,7 +550,27 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [840, 380.0]
+    coordinate: [888, 708.0]
+    rotation: 0
+    state: enabled
+- name: soapy_hackrf_sink_0
+  id: soapy_hackrf_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: 'False'
+    bandwidth: '0'
+    center_freq: 435e6
+    comment: ''
+    dev_args: ''
+    samp_rate: samp_rate
+    type: fc32
+    vga: '30'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [888, 272.0]
     rotation: 0
     state: enabled
 - name: soapy_rtlsdr_source_0
@@ -410,7 +594,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [40, 412.0]
+    coordinate: [88, 748.0]
     rotation: 0
     state: enabled
 
@@ -418,16 +602,21 @@ connections:
 - [blocks_float_to_uchar_0, '0', blocks_file_sink_0, '0']
 - [blocks_uchar_to_float_0, '0', satellites_endurosat_deframer_0, '0']
 - [digital_gfsk_demod_0, '0', blocks_uchar_to_float_0, '0']
+- [digital_gfsk_mod_0, '0', qtgui_waterfall_sink_x_0, '0']
+- [digital_gfsk_mod_0, '0', soapy_hackrf_sink_0, '0']
 - [digital_symbol_sync_xx_0, '0', digital_gfsk_demod_0, '0']
 - [digital_symbol_sync_xx_0, '0', satellites_fsk_demodulator_0, '0']
-- [satellites_endurosat_deframer_0, out, blocks_message_debug_0, print_pdu]
+- [network_socket_pdu_0_0, pdus, blocks_message_debug_0, print_pdu]
+- [network_socket_pdu_0_0, pdus, pdu_pdu_to_stream_x_0, pdus]
+- [pdu_pdu_to_stream_x_0, '0', digital_gfsk_mod_0, '0']
+- [satellites_endurosat_deframer_0, out, blocks_message_debug_0_0, print_pdu]
 - [satellites_endurosat_deframer_0, out, network_socket_pdu_0, pdus]
 - [satellites_endurosat_deframer_0, out, qtgui_waterfall_sink_x_2, in]
 - [satellites_fsk_demodulator_0, '0', blocks_float_to_uchar_0, '0']
 - [satellites_fsk_demodulator_0, '0', blocks_uchar_to_float_0, '0']
 - [satellites_fsk_demodulator_0, '0', satellites_endurosat_deframer_0, '0']
 - [soapy_rtlsdr_source_0, '0', digital_symbol_sync_xx_0, '0']
-- [soapy_rtlsdr_source_0, '0', qtgui_waterfall_sink_x_0, '0']
+- [soapy_rtlsdr_source_0, '0', qtgui_waterfall_sink_x_0_0, '0']
 
 metadata:
   file_format: 1
