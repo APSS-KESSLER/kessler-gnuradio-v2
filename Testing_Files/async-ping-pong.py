@@ -4,6 +4,7 @@ import re
 import asyncio
 import socket
 from typing import Optional
+import struct
 
 import time
 
@@ -230,15 +231,20 @@ async def recieve_task(phy: AsyncUDPManager):
     while True:
         frame = await phy.read()
         print(f"frame: {frame}")
+        int_data = frame.from_bytes(frame, byteorder='big')
+        print(f"frame in Int = {int_data}")
 
-        await phy.write(b"\x09")
 
 async def send_task(phy: AsyncUDPManager):
+    count = 0
     while True:
-        await phy.write(b"\x08")
+        bytey = count.to_bytes(6,byteorder="big")
+        #byte_struct = struct.pack('128s', bytey)
+        count += 1
+        await phy.write(bytey)
         #await phy.write(PAYLOAD_BYTES)
         print("Trying")
-        await asyncio.sleep(.5)
+        await asyncio.sleep(1)
         
         
 
