@@ -97,7 +97,7 @@ class AsyncUDPManager:
         while True:
             try:
                 data, addr = await asyncio.wait_for(
-                    self.loop.sock_recvfrom(self._rx_sock, 65535), timeout=6
+                    self.loop.sock_recvfrom(self._rx_sock, 65535), timeout=1
                 )
 
                 await self.read_queue.put(data)
@@ -231,14 +231,15 @@ async def recieve_task(phy: AsyncUDPManager):
     while True:
         frame = await phy.read()
         print(f"frame: {frame}")
-        int_data = frame.from_bytes(frame, byteorder='big')
-        print(f"frame in Int = {int_data}")
+        for b in frame:
+
+            print(f"frame in Int = {b}")
 
 
 async def send_task(phy: AsyncUDPManager):
     count = 0
     while True:
-        bytey = count.to_bytes(6,byteorder="big")
+        bytey = count.to_bytes(15,byteorder="big")
         #byte_struct = struct.pack('128s', bytey)
         count += 1
         await phy.write(bytey)
