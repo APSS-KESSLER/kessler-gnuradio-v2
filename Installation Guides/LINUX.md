@@ -15,6 +15,13 @@ This script is only supported on:
 
 Do not blindly run scripts, we are not responsible for any breakage of the system.
 
+
+## Recommended: Conda (Universal)
+When running the install.sh script, say yes to install conda.
+
+After the first script, run the seccond script in depend_scripts to install all the dependaices using conda.
+
+
 ## Arch Linux
 ### Dependencies 
 `python >= 3.11`
@@ -84,8 +91,3 @@ cp * ~/.local/state/gnuradio
 # OR
 cp * /usr/share/gnuradio/grc/blocks
 ```
-
-
-
-
-
