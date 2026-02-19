@@ -106,7 +106,7 @@ class AsyncUDPManager:
                 print(
                     "#######################################################TIMEOUT ERROR WAITING FOR PING"
                 )
-                return 
+                
             except Exception as e:
                 print(f"Read error: {e}")
                 break
@@ -239,7 +239,7 @@ async def recieve_task(phy: AsyncUDPManager):
 async def send_task(phy: AsyncUDPManager):
     count = 0
     while True:
-        bytey = count.to_bytes(15,byteorder="big")
+        bytey = count.to_bytes(3,byteorder="big")
         #byte_struct = struct.pack('128s', bytey)
         count += 1
         await phy.write(bytey)
