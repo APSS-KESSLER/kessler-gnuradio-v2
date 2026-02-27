@@ -214,6 +214,75 @@ blocks:
     coordinate: [856, 524.0]
     rotation: 0
     state: disabled
+- name: digital_gfsk_demod_1
+  id: digital_gfsk_demod
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    freq_error: '0.0'
+    gain_mu: '0.175'
+    log: 'False'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mu: '0.5'
+    omega_relative_limit: '0.005'
+    samples_per_symbol: '2'
+    sensitivity: '1.0'
+    verbose: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [424, 460.0]
+    rotation: 0
+    state: disabled
+- name: digital_gfsk_demod_2
+  id: digital_gfsk_demod
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    freq_error: '0.0'
+    gain_mu: '0.175'
+    log: 'False'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mu: '0.5'
+    omega_relative_limit: '0.005'
+    samples_per_symbol: '2'
+    sensitivity: '1.0'
+    verbose: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [912, 836.0]
+    rotation: 0
+    state: disabled
+- name: digital_gfsk_demod_3
+  id: digital_gfsk_demod
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    freq_error: '0.0'
+    gain_mu: '0.175'
+    log: 'False'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mu: '0.5'
+    omega_relative_limit: '0.005'
+    samples_per_symbol: '2'
+    sensitivity: '1.0'
+    verbose: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [904, 884.0]
+    rotation: 0
+    state: disabled
 - name: digital_gfsk_mod_0
   id: digital_gfsk_mod
   parameters:
@@ -259,7 +328,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [472, 716.0]
+    coordinate: [512, 732.0]
     rotation: 0
     state: enabled
 - name: import_0
@@ -516,6 +585,23 @@ blocks:
     coordinate: [1528, 548.0]
     rotation: 0
     state: enabled
+- name: satellites_ax25_deframer_0
+  id: satellites_ax25_deframer
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    g3ruh_scrambler: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    options: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1088, 888.0]
+    rotation: 0
+    state: disabled
 - name: satellites_endurosat_deframer_0
   id: satellites_endurosat_deframer
   parameters:
@@ -530,7 +616,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1304, 724.0]
+    coordinate: [1296, 740.0]
     rotation: 0
     state: enabled
 - name: satellites_fsk_demodulator_0
@@ -550,7 +636,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [888, 708.0]
+    coordinate: [952, 724.0]
     rotation: 0
     state: enabled
 - name: soapy_hackrf_sink_0
@@ -571,6 +657,52 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [888, 272.0]
+    rotation: 0
+    state: enabled
+- name: soapy_hackrf_source_0
+  id: soapy_hackrf_source
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: 'False'
+    bandwidth: '0'
+    center_freq: freq
+    comment: ''
+    dev_args: ''
+    gain: '16'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    type: fc32
+    vga: '16'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [104, 508.0]
+    rotation: 0
+    state: disabled
+- name: soapy_hackrf_source_1
+  id: soapy_hackrf_source
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: 'False'
+    bandwidth: '0'
+    center_freq: '435'
+    comment: ''
+    dev_args: ''
+    gain: '16'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    type: fc32
+    vga: '16'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [80, 908.0]
     rotation: 0
     state: enabled
 - name: soapy_rtlsdr_source_0
@@ -596,27 +728,39 @@ blocks:
     bus_structure: null
     coordinate: [88, 748.0]
     rotation: 0
-    state: enabled
+    state: disabled
 
 connections:
 - [blocks_float_to_uchar_0, '0', blocks_file_sink_0, '0']
 - [blocks_uchar_to_float_0, '0', satellites_endurosat_deframer_0, '0']
 - [digital_gfsk_demod_0, '0', blocks_uchar_to_float_0, '0']
+- [digital_gfsk_demod_2, '0', satellites_endurosat_deframer_0, '0']
+- [digital_gfsk_demod_2, '0', satellites_fsk_demodulator_0, '0']
+- [digital_gfsk_demod_3, '0', blocks_message_debug_0_0, log]
+- [digital_gfsk_demod_3, '0', blocks_message_debug_0_0, print]
+- [digital_gfsk_demod_3, '0', network_socket_pdu_0, pdus]
+- [digital_gfsk_demod_3, '0', qtgui_waterfall_sink_x_2, in]
+- [digital_gfsk_demod_3, '0', satellites_endurosat_deframer_0, '0']
 - [digital_gfsk_mod_0, '0', qtgui_waterfall_sink_x_0, '0']
 - [digital_gfsk_mod_0, '0', soapy_hackrf_sink_0, '0']
 - [digital_symbol_sync_xx_0, '0', digital_gfsk_demod_0, '0']
+- [digital_symbol_sync_xx_0, '0', digital_gfsk_demod_2, '0']
 - [digital_symbol_sync_xx_0, '0', satellites_fsk_demodulator_0, '0']
 - [network_socket_pdu_0_0, pdus, blocks_message_debug_0, print_pdu]
 - [network_socket_pdu_0_0, pdus, pdu_pdu_to_stream_x_0, pdus]
 - [pdu_pdu_to_stream_x_0, '0', digital_gfsk_mod_0, '0']
+- [satellites_ax25_deframer_0, out, network_socket_pdu_0, pdus]
+- [satellites_ax25_deframer_0, out, qtgui_waterfall_sink_x_2, in]
 - [satellites_endurosat_deframer_0, out, blocks_message_debug_0_0, print_pdu]
 - [satellites_endurosat_deframer_0, out, network_socket_pdu_0, pdus]
 - [satellites_endurosat_deframer_0, out, qtgui_waterfall_sink_x_2, in]
 - [satellites_fsk_demodulator_0, '0', blocks_float_to_uchar_0, '0']
 - [satellites_fsk_demodulator_0, '0', blocks_uchar_to_float_0, '0']
+- [satellites_fsk_demodulator_0, '0', satellites_ax25_deframer_0, '0']
 - [satellites_fsk_demodulator_0, '0', satellites_endurosat_deframer_0, '0']
-- [soapy_rtlsdr_source_0, '0', digital_symbol_sync_xx_0, '0']
-- [soapy_rtlsdr_source_0, '0', qtgui_waterfall_sink_x_0_0, '0']
+- [soapy_hackrf_source_1, '0', digital_gfsk_demod_3, '0']
+- [soapy_hackrf_source_1, '0', digital_symbol_sync_xx_0, '0']
+- [soapy_hackrf_source_1, '0', qtgui_waterfall_sink_x_0_0, '0']
 
 metadata:
   file_format: 1

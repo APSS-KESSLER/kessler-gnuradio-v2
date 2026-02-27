@@ -556,6 +556,23 @@ blocks:
     coordinate: [1624, 204.0]
     rotation: 0
     state: enabled
+- name: satellites_ax25_deframer_0
+  id: satellites_ax25_deframer
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    g3ruh_scrambler: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    options: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1472, 428.0]
+    rotation: 0
+    state: enabled
 - name: satellites_endurosat_deframer_0
   id: satellites_endurosat_deframer
   parameters:
@@ -570,9 +587,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1456, 472.0]
+    coordinate: [1464, 492.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: satellites_fsk_demodulator_0
   id: satellites_fsk_demodulator
   parameters:
@@ -591,6 +608,29 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1096, 356.0]
+    rotation: 0
+    state: enabled
+- name: soapy_hackrf_source_0
+  id: soapy_hackrf_source
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: 'False'
+    bandwidth: '0'
+    center_freq: '435'
+    comment: ''
+    dev_args: ''
+    gain: '16'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    type: fc32
+    vga: '16'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [216, 368.0]
     rotation: 0
     state: enabled
 - name: soapy_rtlsdr_source_0
@@ -616,7 +656,7 @@ blocks:
     bus_structure: null
     coordinate: [104, 348.0]
     rotation: 0
-    state: enabled
+    state: disabled
 
 connections:
 - [analog_pwr_squelch_xx_0, '0', digital_gfsk_demod_0, '0']
@@ -627,12 +667,17 @@ connections:
 - [digital_gfsk_demod_0, '0', blocks_uchar_to_float_0, '0']
 - [digital_symbol_sync_xx_0, '0', qtgui_waterfall_sink_x_1_0, '0']
 - [digital_symbol_sync_xx_0, '0', satellites_fsk_demodulator_0, '0']
+- [satellites_ax25_deframer_0, out, blocks_message_debug_0, log]
+- [satellites_ax25_deframer_0, out, blocks_message_debug_0, print_pdu]
+- [satellites_ax25_deframer_0, out, qtgui_waterfall_sink_x_2, in]
 - [satellites_endurosat_deframer_0, out, blocks_message_debug_0, print_pdu]
 - [satellites_endurosat_deframer_0, out, qtgui_waterfall_sink_x_2, in]
 - [satellites_fsk_demodulator_0, '0', blocks_uchar_to_float_0, '0']
 - [satellites_fsk_demodulator_0, '0', qtgui_time_sink_x_0, '0']
 - [satellites_fsk_demodulator_0, '0', qtgui_waterfall_sink_x_1, '0']
+- [satellites_fsk_demodulator_0, '0', satellites_ax25_deframer_0, '0']
 - [satellites_fsk_demodulator_0, '0', satellites_endurosat_deframer_0, '0']
+- [soapy_hackrf_source_0, '0', blocks_throttle2_0, '0']
 - [soapy_rtlsdr_source_0, '0', blocks_throttle2_0, '0']
 
 metadata:

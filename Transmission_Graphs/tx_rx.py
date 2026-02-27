@@ -85,41 +85,20 @@ class tx_rx(gr.top_block, Qt.QWidget):
         # Blocks
         ##################################################
 
-        self.soapy_rtlsdr_source_0 = None
-        dev = 'driver=rtlsdr'
-        stream_args = 'bufflen=16384'
+        self.soapy_hackrf_source_1 = None
+        dev = 'driver=hackrf'
+        stream_args = ''
         tune_args = ['']
         settings = ['']
 
-        def _set_soapy_rtlsdr_source_0_gain_mode(channel, agc):
-            self.soapy_rtlsdr_source_0.set_gain_mode(channel, agc)
-            if not agc:
-                  self.soapy_rtlsdr_source_0.set_gain(channel, self._soapy_rtlsdr_source_0_gain_value)
-        self.set_soapy_rtlsdr_source_0_gain_mode = _set_soapy_rtlsdr_source_0_gain_mode
-
-        def _set_soapy_rtlsdr_source_0_gain(channel, name, gain):
-            self._soapy_rtlsdr_source_0_gain_value = gain
-            if not self.soapy_rtlsdr_source_0.get_gain_mode(channel):
-                self.soapy_rtlsdr_source_0.set_gain(channel, gain)
-        self.set_soapy_rtlsdr_source_0_gain = _set_soapy_rtlsdr_source_0_gain
-
-        def _set_soapy_rtlsdr_source_0_bias(bias):
-            if 'biastee' in self._soapy_rtlsdr_source_0_setting_keys:
-                self.soapy_rtlsdr_source_0.write_setting('biastee', bias)
-        self.set_soapy_rtlsdr_source_0_bias = _set_soapy_rtlsdr_source_0_bias
-
-        self.soapy_rtlsdr_source_0 = soapy.source(dev, "fc32", 1, '',
+        self.soapy_hackrf_source_1 = soapy.source(dev, "fc32", 1, '',
                                   stream_args, tune_args, settings)
-
-        self._soapy_rtlsdr_source_0_setting_keys = [a.key for a in self.soapy_rtlsdr_source_0.get_setting_info()]
-
-        self.soapy_rtlsdr_source_0.set_sample_rate(0, samp_rate)
-        self.soapy_rtlsdr_source_0.set_frequency(0, 435E6)
-        self.soapy_rtlsdr_source_0.set_frequency_correction(0, 97.5)
-        self.set_soapy_rtlsdr_source_0_bias(bool(False))
-        self._soapy_rtlsdr_source_0_gain_value = 20
-        self.set_soapy_rtlsdr_source_0_gain_mode(0, bool(False))
-        self.set_soapy_rtlsdr_source_0_gain(0, 'TUNER', 20)
+        self.soapy_hackrf_source_1.set_sample_rate(0, samp_rate)
+        self.soapy_hackrf_source_1.set_bandwidth(0, 0)
+        self.soapy_hackrf_source_1.set_frequency(0, 435)
+        self.soapy_hackrf_source_1.set_gain(0, 'AMP', False)
+        self.soapy_hackrf_source_1.set_gain(0, 'LNA', min(max(16, 0.0), 40.0))
+        self.soapy_hackrf_source_1.set_gain(0, 'VGA', min(max(16, 0.0), 62.0))
         self.soapy_hackrf_sink_0 = None
         dev = 'driver=hackrf'
         stream_args = ''
@@ -134,7 +113,7 @@ class tx_rx(gr.top_block, Qt.QWidget):
         self.soapy_hackrf_sink_0.set_gain(0, 'AMP', False)
         self.soapy_hackrf_sink_0.set_gain(0, 'VGA', min(max(30, 0.0), 47.0))
         self.satellites_fsk_demodulator_0 = satellites.components.demodulators.fsk_demodulator(baudrate = baud, samp_rate = baud*2, iq = True, subaudio = False, options="--deviation 2400 --use_agc")
-        self.satellites_endurosat_deframer_0 = satellites.components.deframers.endurosat_deframer(syncword_threshold=0, options="")
+        self.satellites_ax25_deframer_0 = satellites.components.deframers.ax25_deframer(g3ruh_scrambler=True, options="")
         self.qtgui_waterfall_sink_x_2 = qtgui.waterfall_sink_f(
             1024, #size
             window.WIN_BLACKMAN_hARRIS, #wintype
@@ -270,16 +249,16 @@ class tx_rx(gr.top_block, Qt.QWidget):
         # Connections
         ##################################################
         self.msg_connect((self.network_socket_pdu_0_0, 'pdus'), (self.pdu_pdu_to_stream_x_0, 'pdus'))
-        self.msg_connect((self.satellites_endurosat_deframer_0, 'out'), (self.blocks_message_debug_0_0, 'print_pdu'))
-        self.msg_connect((self.satellites_endurosat_deframer_0, 'out'), (self.network_socket_pdu_0, 'pdus'))
-        self.msg_connect((self.satellites_endurosat_deframer_0, 'out'), (self.qtgui_waterfall_sink_x_2, 'in'))
+        self.msg_connect((self.satellites_ax25_deframer_0, 'out'), (self.blocks_message_debug_0_0, 'print_pdu'))
+        self.msg_connect((self.satellites_ax25_deframer_0, 'out'), (self.network_socket_pdu_0, 'pdus'))
+        self.msg_connect((self.satellites_ax25_deframer_0, 'out'), (self.qtgui_waterfall_sink_x_2, 'in'))
         self.connect((self.digital_gfsk_mod_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
         self.connect((self.digital_gfsk_mod_0, 0), (self.soapy_hackrf_sink_0, 0))
         self.connect((self.digital_symbol_sync_xx_0, 0), (self.satellites_fsk_demodulator_0, 0))
         self.connect((self.pdu_pdu_to_stream_x_0, 0), (self.digital_gfsk_mod_0, 0))
-        self.connect((self.satellites_fsk_demodulator_0, 0), (self.satellites_endurosat_deframer_0, 0))
-        self.connect((self.soapy_rtlsdr_source_0, 0), (self.digital_symbol_sync_xx_0, 0))
-        self.connect((self.soapy_rtlsdr_source_0, 0), (self.qtgui_waterfall_sink_x_0_0, 0))
+        self.connect((self.satellites_fsk_demodulator_0, 0), (self.satellites_ax25_deframer_0, 0))
+        self.connect((self.soapy_hackrf_source_1, 0), (self.digital_symbol_sync_xx_0, 0))
+        self.connect((self.soapy_hackrf_source_1, 0), (self.qtgui_waterfall_sink_x_0_0, 0))
 
 
     def closeEvent(self, event):
@@ -316,7 +295,7 @@ class tx_rx(gr.top_block, Qt.QWidget):
         self.qtgui_waterfall_sink_x_0_0.set_frequency_range(435e6, self.samp_rate)
         self.qtgui_waterfall_sink_x_2.set_frequency_range(435e6, self.samp_rate)
         self.soapy_hackrf_sink_0.set_sample_rate(0, self.samp_rate)
-        self.soapy_rtlsdr_source_0.set_sample_rate(0, self.samp_rate)
+        self.soapy_hackrf_source_1.set_sample_rate(0, self.samp_rate)
 
     def get_freq_deviation(self):
         return self.freq_deviation

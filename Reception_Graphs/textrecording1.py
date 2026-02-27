@@ -12,8 +12,6 @@
 from PyQt5 import Qt
 from gnuradio import qtgui
 from gnuradio import blocks, gr
-from gnuradio import digital
-from gnuradio import filter
 from gnuradio import gr
 from gnuradio.filter import firdes
 from gnuradio.fft import window
@@ -26,8 +24,6 @@ from gnuradio import eng_notation
 from gnuradio import network
 from gnuradio import soapy
 import math
-import satellites.components.deframers
-import satellites.components.demodulators
 import sip
 import threading
 
@@ -107,18 +103,16 @@ class textrecording1(gr.top_block, Qt.QWidget):
         self._soapy_rtlsdr_source_0_setting_keys = [a.key for a in self.soapy_rtlsdr_source_0.get_setting_info()]
 
         self.soapy_rtlsdr_source_0.set_sample_rate(0, samp_rate)
-        self.soapy_rtlsdr_source_0.set_frequency(0, 435E6)
+        self.soapy_rtlsdr_source_0.set_frequency(0, 438E6)
         self.soapy_rtlsdr_source_0.set_frequency_correction(0, 97.5)
         self.set_soapy_rtlsdr_source_0_bias(bool(False))
         self._soapy_rtlsdr_source_0_gain_value = 20
         self.set_soapy_rtlsdr_source_0_gain_mode(0, bool(False))
         self.set_soapy_rtlsdr_source_0_gain(0, 'TUNER', 20)
-        self.satellites_fsk_demodulator_0 = satellites.components.demodulators.fsk_demodulator(baudrate = baud, samp_rate = baud*2, iq = True, subaudio = False, options="--deviation 2400 --use_agc")
-        self.satellites_endurosat_deframer_0 = satellites.components.deframers.endurosat_deframer(syncword_threshold=0, options="")
         self.qtgui_waterfall_sink_x_2 = qtgui.waterfall_sink_f(
             1024, #size
             window.WIN_BLACKMAN_hARRIS, #wintype
-            435e6, #fc
+            438e6, #fc
             samp_rate, #bw
             "FINAL", #name
             0, #number of inputs
@@ -154,7 +148,7 @@ class textrecording1(gr.top_block, Qt.QWidget):
         self.qtgui_waterfall_sink_x_0 = qtgui.waterfall_sink_c(
             1024, #size
             window.WIN_BLACKMAN_hARRIS, #wintype
-            435e6, #fc
+            438e6, #fc
             samp_rate, #bw
             "RAW RF INPUT", #name
             1, #number of inputs
@@ -187,30 +181,12 @@ class textrecording1(gr.top_block, Qt.QWidget):
 
         self.top_layout.addWidget(self._qtgui_waterfall_sink_x_0_win)
         self.network_socket_pdu_0 = network.socket_pdu('UDP_CLIENT', '127.0.0.1', '2003', 10000, False)
-        self.digital_symbol_sync_xx_0 = digital.symbol_sync_cc(
-            digital.TED_MUELLER_AND_MULLER,
-            (samp_rate/baud),
-            0.045,
-            1.0,
-            1.0,
-            1.5,
-            2,
-            digital.constellation_bpsk().base(),
-            digital.IR_MMSE_8TAP,
-            128,
-            [])
         self.blocks_message_debug_0 = blocks.message_debug(True, gr.log_levels.info)
 
 
         ##################################################
         # Connections
         ##################################################
-        self.msg_connect((self.satellites_endurosat_deframer_0, 'out'), (self.blocks_message_debug_0, 'print_pdu'))
-        self.msg_connect((self.satellites_endurosat_deframer_0, 'out'), (self.network_socket_pdu_0, 'pdus'))
-        self.msg_connect((self.satellites_endurosat_deframer_0, 'out'), (self.qtgui_waterfall_sink_x_2, 'in'))
-        self.connect((self.digital_symbol_sync_xx_0, 0), (self.satellites_fsk_demodulator_0, 0))
-        self.connect((self.satellites_fsk_demodulator_0, 0), (self.satellites_endurosat_deframer_0, 0))
-        self.connect((self.soapy_rtlsdr_source_0, 0), (self.digital_symbol_sync_xx_0, 0))
         self.connect((self.soapy_rtlsdr_source_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
 
 
@@ -233,9 +209,8 @@ class textrecording1(gr.top_block, Qt.QWidget):
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.digital_symbol_sync_xx_0.set_sps((self.samp_rate/self.baud))
-        self.qtgui_waterfall_sink_x_0.set_frequency_range(435e6, self.samp_rate)
-        self.qtgui_waterfall_sink_x_2.set_frequency_range(435e6, self.samp_rate)
+        self.qtgui_waterfall_sink_x_0.set_frequency_range(438e6, self.samp_rate)
+        self.qtgui_waterfall_sink_x_2.set_frequency_range(438e6, self.samp_rate)
         self.soapy_rtlsdr_source_0.set_sample_rate(0, self.samp_rate)
 
     def get_fsk_deviation_hz(self):
@@ -249,7 +224,6 @@ class textrecording1(gr.top_block, Qt.QWidget):
 
     def set_baud(self, baud):
         self.baud = baud
-        self.digital_symbol_sync_xx_0.set_sps((self.samp_rate/self.baud))
 
 
 

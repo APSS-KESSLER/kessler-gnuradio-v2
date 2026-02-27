@@ -170,6 +170,29 @@ blocks:
     coordinate: [816, 192.0]
     rotation: 0
     state: disabled
+- name: digital_gfsk_demod_1
+  id: digital_gfsk_demod
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    freq_error: '0.0'
+    gain_mu: '0.175'
+    log: 'False'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mu: '0.5'
+    omega_relative_limit: '0.005'
+    samples_per_symbol: '2'
+    sensitivity: '1.0'
+    verbose: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [888, 508.0]
+    rotation: 0
+    state: disabled
 - name: digital_symbol_sync_xx_0
   id: digital_symbol_sync_xx
   parameters:
@@ -194,9 +217,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [432, 380.0]
+    coordinate: [448, 180.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: import_0
   id: import
   parameters:
@@ -258,7 +281,7 @@ blocks:
     color8: '0'
     color9: '0'
     comment: ''
-    fc: 435e6
+    fc: 438e6
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'False'
@@ -319,7 +342,7 @@ blocks:
     color8: '0'
     color9: '0'
     comment: ''
-    fc: 435e6
+    fc: 438e6
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'False'
@@ -349,7 +372,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1480, 220.0]
+    coordinate: [1488, 228.0]
     rotation: 0
     state: enabled
 - name: satellites_endurosat_deframer_0
@@ -368,7 +391,7 @@ blocks:
     bus_structure: null
     coordinate: [1256, 400.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: satellites_fsk_demodulator_0
   id: satellites_fsk_demodulator
   parameters:
@@ -386,9 +409,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [840, 380.0]
+    coordinate: [912, 348.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: soapy_rtlsdr_source_0
   id: soapy_rtlsdr_source
   parameters:
@@ -397,7 +420,7 @@ blocks:
     alias: ''
     bias: 'False'
     bufflen: '16384'
-    center_freq: 435E6
+    center_freq: 438E6
     comment: ''
     dev_args: ''
     freq_correction: '97.5'
@@ -426,9 +449,10 @@ connections:
 - [satellites_fsk_demodulator_0, '0', blocks_float_to_uchar_0, '0']
 - [satellites_fsk_demodulator_0, '0', blocks_uchar_to_float_0, '0']
 - [satellites_fsk_demodulator_0, '0', satellites_endurosat_deframer_0, '0']
+- [soapy_rtlsdr_source_0, '0', digital_gfsk_demod_1, '0']
 - [soapy_rtlsdr_source_0, '0', digital_symbol_sync_xx_0, '0']
 - [soapy_rtlsdr_source_0, '0', qtgui_waterfall_sink_x_0, '0']
 
 metadata:
   file_format: 1
-  grc_version: 3.10.12.0
+  grc_version: 3.10.11.0
