@@ -23,9 +23,9 @@ from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
 from gnuradio import network
+from gnuradio import pdu
 from gnuradio import soapy
 import math
-import satellites
 import sip
 import threading
 
@@ -95,7 +95,6 @@ class transmission_prototype(gr.top_block, Qt.QWidget):
         self.soapy_hackrf_sink_0.set_frequency(0, 436e6)
         self.soapy_hackrf_sink_0.set_gain(0, 'AMP', False)
         self.soapy_hackrf_sink_0.set_gain(0, 'VGA', min(max(30, 0.0), 47.0))
-        self.satellites_nrzi_encode_0 = satellites.nrzi_encode()
         self.qtgui_waterfall_sink_x_0 = qtgui.waterfall_sink_c(
             1024, #size
             window.WIN_BLACKMAN_hARRIS, #wintype
@@ -131,12 +130,11 @@ class transmission_prototype(gr.top_block, Qt.QWidget):
         self._qtgui_waterfall_sink_x_0_win = sip.wrapinstance(self.qtgui_waterfall_sink_x_0.qwidget(), Qt.QWidget)
 
         self.top_layout.addWidget(self._qtgui_waterfall_sink_x_0_win)
+        self.pdu_pdu_to_stream_x_0 = pdu.pdu_to_stream_b(pdu.EARLY_BURST_BALK, 64)
         self.network_socket_pdu_0_0 = network.socket_pdu('UDP_SERVER', '127.0.0.2', '2000', 10000, False)
-        self.digital_scrambler_bb_0 = digital.scrambler_bb(0x21, 0, 16)
-        self.digital_hdlc_framer_pb_0 = digital.hdlc_framer_pb('1')
         self.digital_gfsk_mod_0 = digital.gfsk_mod(
-            samples_per_symbol=2,
-            sensitivity=1.0,
+            samples_per_symbol=(int(samp_rate // baud_rate)),
+            sensitivity=sensitivity,
             bt=0.35,
             verbose=False,
             log=False,
@@ -148,12 +146,10 @@ class transmission_prototype(gr.top_block, Qt.QWidget):
         # Connections
         ##################################################
         self.msg_connect((self.network_socket_pdu_0_0, 'pdus'), (self.blocks_message_debug_0, 'print_pdu'))
-        self.msg_connect((self.network_socket_pdu_0_0, 'pdus'), (self.digital_hdlc_framer_pb_0, 'in'))
+        self.msg_connect((self.network_socket_pdu_0_0, 'pdus'), (self.pdu_pdu_to_stream_x_0, 'pdus'))
         self.connect((self.digital_gfsk_mod_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
         self.connect((self.digital_gfsk_mod_0, 0), (self.soapy_hackrf_sink_0, 0))
-        self.connect((self.digital_hdlc_framer_pb_0, 0), (self.satellites_nrzi_encode_0, 0))
-        self.connect((self.digital_scrambler_bb_0, 0), (self.digital_gfsk_mod_0, 0))
-        self.connect((self.satellites_nrzi_encode_0, 0), (self.digital_scrambler_bb_0, 0))
+        self.connect((self.pdu_pdu_to_stream_x_0, 0), (self.digital_gfsk_mod_0, 0))
 
 
     def closeEvent(self, event):
@@ -184,8 +180,8 @@ class transmission_prototype(gr.top_block, Qt.QWidget):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
         self.set_sensitivity((2 * math.pi * self.freq_deviation) / self.samp_rate)
-        self.soapy_hackrf_sink_0.set_sample_rate(0, self.samp_rate)
         self.qtgui_waterfall_sink_x_0.set_frequency_range(0, self.samp_rate)
+        self.soapy_hackrf_sink_0.set_sample_rate(0, self.samp_rate)
 
     def get_freq_deviation(self):
         return self.freq_deviation

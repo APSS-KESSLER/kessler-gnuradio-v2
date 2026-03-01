@@ -132,44 +132,6 @@ blocks:
     coordinate: [1520, 512.0]
     rotation: 0
     state: enabled
-- name: blocks_uchar_to_float_0
-  id: blocks_uchar_to_float
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1064, 248.0]
-    rotation: 0
-    state: disabled
-- name: digital_gfsk_demod_0
-  id: digital_gfsk_demod
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    freq_error: '0.0'
-    gain_mu: '0.175'
-    log: 'False'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    mu: '0.5'
-    omega_relative_limit: '0.005'
-    samples_per_symbol: '2'
-    sensitivity: '1.0'
-    verbose: 'False'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [816, 192.0]
-    rotation: 0
-    state: disabled
 - name: digital_gfsk_demod_1
   id: digital_gfsk_demod
   parameters:
@@ -217,9 +179,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [448, 180.0]
+    coordinate: [480, 212.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: import_0
   id: import
   parameters:
@@ -389,9 +351,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1256, 400.0]
+    coordinate: [1264, 356.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: satellites_fsk_demodulator_0
   id: satellites_fsk_demodulator
   parameters:
@@ -409,9 +371,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [912, 348.0]
+    coordinate: [928, 252.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: soapy_rtlsdr_source_0
   id: soapy_rtlsdr_source
   parameters:
@@ -420,7 +382,7 @@ blocks:
     alias: ''
     bias: 'False'
     bufflen: '16384'
-    center_freq: 438E6
+    center_freq: 435E6
     comment: ''
     dev_args: ''
     freq_correction: '97.5'
@@ -433,21 +395,17 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [40, 412.0]
+    coordinate: [192, 268.0]
     rotation: 0
     state: enabled
 
 connections:
 - [blocks_float_to_uchar_0, '0', blocks_file_sink_0, '0']
-- [blocks_uchar_to_float_0, '0', satellites_endurosat_deframer_0, '0']
-- [digital_gfsk_demod_0, '0', blocks_uchar_to_float_0, '0']
-- [digital_symbol_sync_xx_0, '0', digital_gfsk_demod_0, '0']
 - [digital_symbol_sync_xx_0, '0', satellites_fsk_demodulator_0, '0']
 - [satellites_endurosat_deframer_0, out, blocks_message_debug_0, print_pdu]
 - [satellites_endurosat_deframer_0, out, network_socket_pdu_0, pdus]
 - [satellites_endurosat_deframer_0, out, qtgui_waterfall_sink_x_2, in]
 - [satellites_fsk_demodulator_0, '0', blocks_float_to_uchar_0, '0']
-- [satellites_fsk_demodulator_0, '0', blocks_uchar_to_float_0, '0']
 - [satellites_fsk_demodulator_0, '0', satellites_endurosat_deframer_0, '0']
 - [soapy_rtlsdr_source_0, '0', digital_gfsk_demod_1, '0']
 - [soapy_rtlsdr_source_0, '0', digital_symbol_sync_xx_0, '0']
@@ -455,4 +413,4 @@ connections:
 
 metadata:
   file_format: 1
-  grc_version: 3.10.11.0
+  grc_version: 3.10.12.0
