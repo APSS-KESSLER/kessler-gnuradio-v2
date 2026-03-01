@@ -175,6 +175,10 @@ CRC16_TABLE = _generate_crc16_table(CRC16_POLY)
 # TODO: perhaps we need to use reflected
 
 
+async def send_task(phy: AsyncUDPManager):
+    count = 0
+
+
 def crc16(data: bytes, *, init: int = 0xFFFF) -> int:
     """Calculates a 16-bit CRC using the CRC-CCITT-BR polynomial."""
     crc = init
@@ -236,13 +240,38 @@ async def recieve_task(phy: AsyncUDPManager):
             print(f"frame in Int = {b}")
 
 
+ENCRYPTED_CAPTURED_HANDSHAKE_FRAME = (
+    "51 a8 31 28 1e 48 06 81 05 47 6a 11 42 5f 1e d9 da 2c 74 8e 1b 64 a9 ef "
+    "6b 66 64 3c 15 5d 61 7f 46 53 36 83 f5 1f 05 7c f2 ae f1 4d e7 5b f6 54"
+)
+
+
+DECRYPTED_CAPTURED_HANDSHAKE_FRAME = (
+    "01 00 26 08 bf 01 00 22 00 00 00 00 00 00 00 00 00 00 00 00 00 00 "
+    "00 00 00 00 00 00 00 00 00 03 00 00 00 00 00 00 00 95 6a 96 76"
+)
+
+RANDOM_BULLSHIT_HANDSHAKE_FRAME = (
+    "26 fe f1 6e 90 a0 bc a5 6a fa f1 fe ce 45 2a 26 98 26 6d 24 d7 84 67 d4 64 03 db 11 76 71 76 9a 87 b5"
+)
+
+RANDOM_BULLSHIT_HANDSHAKE_FRAME_2 = (
+    "26 fe f1 6e 90 a0 bc a5 6a fa f1 fe ce 45 2a 26 98 26 6d 24 d7 84 67 d4 64 03 a9 52 2b 03 0f 14 23 be 01 80 a7 75 9b"
+)
+
+f = 51 
+TEST = ( f"{f:02x}")
+
+
 async def send_task(phy: AsyncUDPManager):
     count = 0
     while True:
+        FRAME = bytes.fromhex(RANDOM_BULLSHIT_HANDSHAKE_FRAME)
+        print(f"FRAME: {FRAME}")
         bytey = count.to_bytes(3,byteorder="big")
         #byte_struct = struct.pack('128s', bytey)
         count += 1
-        await phy.write(bytey)
+        await phy.write(FRAME)
         #await phy.write(PAYLOAD_BYTES)
         print("Trying")
         await asyncio.sleep(1)
