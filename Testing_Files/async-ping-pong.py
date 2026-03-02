@@ -259,6 +259,40 @@ RANDOM_BULLSHIT_HANDSHAKE_FRAME_2 = (
     "26 fe f1 6e 90 a0 bc a5 6a fa f1 fe ce 45 2a 26 98 26 6d 24 d7 84 67 d4 64 03 a9 52 2b 03 0f 14 23 be 01 80 a7 75 9b"
 )
 
+CAPTURED_HANDSHAKE_PACKET = (
+    "01 00 11 00 00 00 00 00 00 00 00 00 00 00 00 00 00 "
+    "00 00 00 00 00 00 00 00 00 04 00 00 00 00 00 00 00"
+)
+
+AIRMAC_PROTOCOL_ID = b"\x01"
+RADIO_MODULE_ADDRESS = b"\x11"
+PAYLOAD_AND_HEADER = b"\x26"
+HEADER_CRC = b"\x4a\x8f"
+
+AIRMAC_PROTOCOL_VERSION = b"\x01\x00"
+CUBESAT_ID = b"\x02\x00\x00\x00\x00\x00\x00\x00" #from read sat id command in SpaceDev
+GROUND_STATION_ID = b"\x00\x00\x00\x00\x00\x00\x00\x00"
+CAPABILITY_FLAGS = b"\x00\x00\x00\x00\x00\x00\x00\x00"
+SESSION_ID = b"\x01\x00\x00\x00\x00\x00\x00\x00"
+
+
+CRC_32_BYTE = 0xC073EA6C
+CRC_32 = CRC_32_BYTE.to_bytes(4, byteorder="little")
+
+RECONSTRUCTED_FRAME = (
+    AIRMAC_PROTOCOL_ID
+    + RADIO_MODULE_ADDRESS
+    + PAYLOAD_AND_HEADER
+    + HEADER_CRC
+    + AIRMAC_PROTOCOL_VERSION
+    + CUBESAT_ID
+    + GROUND_STATION_ID
+    + CAPABILITY_FLAGS
+    + SESSION_ID
+    +CRC_32
+)
+
+#
 f = 51 
 TEST = ( f"{f:02x}")
 
@@ -266,7 +300,7 @@ TEST = ( f"{f:02x}")
 async def send_task(phy: AsyncUDPManager):
     count = 0
     while True:
-        FRAME = bytes.fromhex(RANDOM_BULLSHIT_HANDSHAKE_FRAME)
+        FRAME = bytes.fromhex(RECONSTRUCTED_FRAME.hex())
         print(f"FRAME: {FRAME}")
         bytey = count.to_bytes(3,byteorder="big")
         #byte_struct = struct.pack('128s', bytey)
