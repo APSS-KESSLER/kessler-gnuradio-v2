@@ -32,6 +32,7 @@ if [[ "$conda" =~ ^([yes|y])$ ]]; then
     fi
     echo "Conda is installed"
     echo "Please execute the second script in depend_scripts: after_conda.sh"
+    echo -e "\033[1mIf you want to create a seperate enviroument, use conda create to make the enviroument for gnuradio dependancies before creating the script.\033[0m"
     echo "Ensure you execute the following before execution"
     echo "eval \"\$(/home/paul/miniconda3/bin/conda shell.bash hook)\" "
     rm Mini*
