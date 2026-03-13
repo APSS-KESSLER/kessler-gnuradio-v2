@@ -302,7 +302,7 @@ async def send_task(phy: AsyncUDPManager):
     while True:
         FRAME = bytes.fromhex(RECONSTRUCTED_FRAME.hex())
         print(f"FRAME: {FRAME}")
-        bytey = count.to_bytes(3,byteorder="big")
+        bytey = count.to_bytes(1,byteorder="big")
         #byte_struct = struct.pack('128s', bytey)
         count += 1
         await phy.write(FRAME)
