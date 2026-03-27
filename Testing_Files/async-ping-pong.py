@@ -2,6 +2,7 @@ import argparse
 import binascii
 import re
 import asyncio
+import math
 import socket
 from typing import Optional
 import struct
@@ -59,8 +60,8 @@ class AsyncUDPManager:
         self._rx_sock: Optional[socket.socket] = None
         self.loop = None
 
-        self.read_queue = asyncio.Queue()
-        self.write_queue = asyncio.Queue()
+        self.read_queue = asyncio.Queue(8)
+        self.write_queue = asyncio.Queue(8)
 
         self._tx_task = None
         self._rx_task = None
@@ -90,7 +91,7 @@ class AsyncUDPManager:
 
             if data is not None:
                 await self.loop.sock_sendto(self._tx_sock, data, self.tx_addr)
-                print(f"TX COMPLETED, sent {data}")
+                # print(f"TX COMPLETED, sent {data}")
                 await asyncio.sleep(0.1)
 
     async def _rx_loop(self):
@@ -101,11 +102,12 @@ class AsyncUDPManager:
                 )
 
                 await self.read_queue.put(data)
-                hexdump(data)
+                # hexdump(data)
             except asyncio.TimeoutError:
-                print(
-                    "#######################################################TIMEOUT ERROR WAITING FOR PING"
-                )
+                print("T", flush=True, end="")
+                # print(
+                #     "#######################################################TIMEOUT ERROR WAITING FOR PING"
+                # )
                 
             except Exception as e:
                 print(f"Read error: {e}")
@@ -113,14 +115,14 @@ class AsyncUDPManager:
 
     async def write(self, data):
         await self.write_queue.put(gen_packet(data))
-        print("Successful Write to Queue from Airmac")
+        # print("Successful Write to Queue from Airmac")
 
     async def read(self):
         data = await self.read_queue.get()
-        print(
-            "#####################################################Retrieved data from Queue, pumping to Airmac. Recieved:"
-        )
-        hexdump(data)
+        # print(
+        #     "#####################################################Retrieved data from Queue, pumping to Airmac. Recieved:"
+        # )
+        # hexdump(data)
         return data
     
     async def shutdown(self):
@@ -147,7 +149,7 @@ def hexdump(data: bytes) -> None:
     hexstr = binascii.hexlify(data)
     hexstr = b" ".join(hexstr[i : i + 2] for i in range(0, len(hexstr), 2))
     text = re.sub(r"[^a-zA-Z]+".encode(), b".", data)
-    print(f"{hexstr} \t {text.decode()}")
+    # print(f"{hexstr} \t {text.decode()}")
 
 
 def _generate_crc16_table(poly: int) -> list[int]:
@@ -174,11 +176,6 @@ CRC16_TABLE = _generate_crc16_table(CRC16_POLY)
 
 # TODO: perhaps we need to use reflected
 
-
-async def send_task(phy: AsyncUDPManager):
-    count = 0
-
-
 def crc16(data: bytes, *, init: int = 0xFFFF) -> int:
     """Calculates a 16-bit CRC using the CRC-CCITT-BR polynomial."""
     crc = init
@@ -199,7 +196,7 @@ def gen_packet(data: str | bytes) -> bytes:
 
     else:
         frame = bytes([len(data), *data])
-    print(f"crc 16: {crc16(frame).to_bytes(2, 'big')}")
+    # print(f"crc 16: {crc16(frame).to_bytes(2, 'big')}")
     hexdump(frame)
     return b"\xaa" * 5 + b"\x7e" + frame + crc16(frame).to_bytes(2, "big")
 
@@ -207,7 +204,7 @@ def gen_packet(data: str | bytes) -> bytes:
 async def rx_consumer(phy: AsyncUDPManager):
     while True:
         data = await phy.read()
-        print(f"Received: {data!r}")
+        # print(f"Received: {data!r}")
         await phy.write("pong")
 
 
@@ -231,13 +228,47 @@ async def tx_response(phy: AsyncUDPManager, interval: float = 2):
 
 ###########################################TESTING FUNCTIONALITY###############################################
 
-async def recieve_task(phy: AsyncUDPManager):
+class Stats:
+    def __init__(self) -> None:
+        print("NEW STATS BITCH")
+        self.tx = 0
+        self.rx = 0
+    
+    def reset(self) -> None:
+        self.tx = 0
+        self.rx = 0
+
+    @property
+    def pct_success(self) -> float:
+        if self.rx == 0:
+            return math.nan
+
+        return self.tx / self.rx
+
+
+async def stat_print_task(stats: Stats):
+    stat_period = 2
+    stat_deadline = time.monotonic() + stat_period
+    while True:
+        if time.monotonic() >= stat_deadline:
+            print()
+            print(f"# TXed : {stats.tx}")
+            print(f"# RXed : {stats.rx}")
+            print(f"# Ratio: {stats.pct_success}")
+            print(f"{id(stats)}")
+            stat_deadline = stat_deadline + stat_period
+
+        await asyncio.sleep(stat_period // 4)
+    
+
+async def recieve_task(phy: AsyncUDPManager, stats: Stats):
     while True:
         frame = await phy.read()
-        print(f"frame: {frame}")
-        for b in frame:
-
-            print(f"frame in Int = {b}")
+        print("R", flush=True, end="")
+        stats.rx += 1
+        # print(f"frame: {frame}")
+        # for b in frame:
+        #     print(f"frame in Int = {b}")
 
 
 ENCRYPTED_CAPTURED_HANDSHAKE_FRAME = (
@@ -297,18 +328,18 @@ f = 51
 TEST = ( f"{f:02x}")
 
 
-async def send_task(phy: AsyncUDPManager):
-    count = 0
+async def send_task(phy: AsyncUDPManager, stats: Stats):
+    count = 1
     while True:
         FRAME = bytes.fromhex(RECONSTRUCTED_FRAME.hex())
-        print(f"FRAME: {FRAME}")
+        # print(f"FRAME: {FRAME}")
         bytey = count.to_bytes(1,byteorder="big")
-        #byte_struct = struct.pack('128s', bytey)
-        count += 1
+        byte_struct = struct.pack('128s', bytey)
+    
         await phy.write(FRAME)
-        #await phy.write(PAYLOAD_BYTES)
-        print("Trying")
-        await asyncio.sleep(1)
+        print(".", flush=True, end="")
+        stats.tx += 1
+        await asyncio.sleep(.1)
         
         
 
@@ -318,16 +349,18 @@ async def send_task(phy: AsyncUDPManager):
 async def main(
     rx_port: tuple[str, int], tx_addr: tuple[str, int], *, send: bool
 ) -> None:
+    stats = Stats()
     phy = AsyncUDPManager(rx_port=rx_port, tx_addr=tx_addr)
     await phy.initialize()
 
+    tasks = [] 
+    tasks.append(asyncio.create_task(stat_print_task(stats)))
     if send:
         # asyncio.create_task(mac_beacon(phy))
-        await asyncio.create_task(send_task(phy))
+        tasks.append(asyncio.create_task(send_task(phy, stats)))
 
     else:
-        print("Mac task")
-        await asyncio.create_task(recieve_task(phy))
+        tasks.append(asyncio.create_task(recieve_task(phy, stats)))
     
 
     # asyncio.create_task(mac_task(phy))
