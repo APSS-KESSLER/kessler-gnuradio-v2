@@ -42,7 +42,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [400, 20.0]
+    coordinate: [416, 12.0]
     rotation: 0
     state: enabled
 - name: freq_deviation
@@ -54,7 +54,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [616, 20.0]
+    coordinate: [616, 12.0]
     rotation: 0
     state: enabled
 - name: frequency_correction
@@ -87,7 +87,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [808, 4.0]
+    coordinate: [1144, 20.0]
     rotation: 0
     state: enabled
 - name: rx_offset
@@ -99,7 +99,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [496, 20.0]
+    coordinate: [520, 12.0]
     rotation: 0
     state: enabled
 - name: samp_rate
@@ -180,7 +180,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [2136, 768.0]
+    coordinate: [2192, 800.0]
     rotation: 0
     state: enabled
 - name: digital_symbol_sync_xx_0
@@ -207,7 +207,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1584, 492.0]
+    coordinate: [1584, 372.0]
     rotation: 0
     state: enabled
 - name: filter_fft_low_pass_filter_0
@@ -271,7 +271,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [2208, 548.0]
+    coordinate: [2280, 356.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_2
@@ -368,7 +368,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1664, 380.0]
+    coordinate: [1584, 260.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_2_1_0_1
@@ -526,7 +526,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [952, 20.0]
+    coordinate: [1048, 124.0]
     rotation: 0
     state: enabled
 - name: qtgui_waterfall_sink_x_0_0
@@ -587,68 +587,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1336, 156.0]
-    rotation: 0
-    state: enabled
-- name: qtgui_waterfall_sink_x_0_1
-  id: qtgui_waterfall_sink_x
-  parameters:
-    affinity: ''
-    alias: ''
-    alpha1: '1.0'
-    alpha10: '1.0'
-    alpha2: '1.0'
-    alpha3: '1.0'
-    alpha4: '1.0'
-    alpha5: '1.0'
-    alpha6: '1.0'
-    alpha7: '1.0'
-    alpha8: '1.0'
-    alpha9: '1.0'
-    axislabels: 'True'
-    bw: samp_rate
-    color1: '0'
-    color10: '0'
-    color2: '0'
-    color3: '0'
-    color4: '0'
-    color5: '0'
-    color6: '0'
-    color7: '0'
-    color8: '0'
-    color9: '0'
-    comment: ''
-    fc: '0'
-    fftsize: '1024'
-    freqhalf: 'True'
-    grid: 'False'
-    gui_hint: ''
-    int_max: '10'
-    int_min: '-140'
-    label1: ''
-    label10: ''
-    label2: ''
-    label3: ''
-    label4: ''
-    label5: ''
-    label6: ''
-    label7: ''
-    label8: ''
-    label9: ''
-    legend: 'True'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    name: '"Mod Output"'
-    nconnections: '1'
-    showports: 'False'
-    type: complex
-    update_time: '0.10'
-    wintype: window.WIN_BLACKMAN_hARRIS
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [328, 388.0]
+    coordinate: [1344, 180.0]
     rotation: 0
     state: enabled
 - name: qtgui_waterfall_sink_x_0_1_0
@@ -709,7 +648,24 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [704, 372.0]
+    coordinate: [488, 372.0]
+    rotation: 0
+    state: enabled
+- name: satellites_ax25_deframer_0
+  id: satellites_ax25_deframer
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    g3ruh_scrambler: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    options: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1912, 892.0]
     rotation: 0
     state: enabled
 - name: satellites_endurosat_deframer_1_0
@@ -726,7 +682,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1952, 500.0]
+    coordinate: [1936, 380.0]
     rotation: 0
     state: enabled
 - name: soapy_rtlsdr_source_0
@@ -750,7 +706,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [136, 316.0]
+    coordinate: [224, 268.0]
     rotation: 0
     state: enabled
 
@@ -758,15 +714,16 @@ connections:
 - [analog_quadrature_demod_cf_0, '0', digital_symbol_sync_xx_0, '0']
 - [analog_quadrature_demod_cf_0, '0', qtgui_time_sink_x_2, '0']
 - [digital_symbol_sync_xx_0, '0', qtgui_time_sink_x_2_1_0_1, '0']
+- [digital_symbol_sync_xx_0, '0', satellites_ax25_deframer_0, '0']
 - [digital_symbol_sync_xx_0, '0', satellites_endurosat_deframer_1_0, '0']
 - [filter_fft_low_pass_filter_0, '0', analog_quadrature_demod_cf_0, '0']
 - [filter_fft_low_pass_filter_0, '0', qtgui_waterfall_sink_x_0_0, '0']
 - [freq_xlating_fir_filter_xxx_0, '0', filter_fft_low_pass_filter_0, '0']
 - [freq_xlating_fir_filter_xxx_0, '0', qtgui_waterfall_sink_x_0, '0']
+- [satellites_ax25_deframer_0, out, blocks_message_debug_0_0, print_pdu]
 - [satellites_endurosat_deframer_1_0, out, blocks_message_debug_0_0, print_pdu]
 - [satellites_endurosat_deframer_1_0, out, network_socket_pdu_0_1, pdus]
 - [soapy_rtlsdr_source_0, '0', freq_xlating_fir_filter_xxx_0, '0']
-- [soapy_rtlsdr_source_0, '0', qtgui_waterfall_sink_x_0_1, '0']
 - [soapy_rtlsdr_source_0, '0', qtgui_waterfall_sink_x_0_1_0, '0']
 
 metadata:

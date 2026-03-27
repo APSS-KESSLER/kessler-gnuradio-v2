@@ -226,11 +226,16 @@ async def tx_response(phy: AsyncUDPManager, interval: float = 2):
     await asyncio.sleep(interval)
 
 
+def decode_response_packet(data: bytes):
+    AIRMAC_DATA = data[1:]
+    if AIRMAC_DATA[0] ==  0x02:
+        return True
+
+
 ###########################################TESTING FUNCTIONALITY###############################################
 
 class Stats:
     def __init__(self) -> None:
-        print("NEW STATS BITCH")
         self.tx = 0
         self.rx = 0
     
@@ -310,7 +315,7 @@ SESSION_ID = b"\x01\x00\x00\x00\x00\x00\x00\x00"
 CRC_32_BYTE = 0xC073EA6C
 CRC_32 = CRC_32_BYTE.to_bytes(4, byteorder="little")
 
-RECONSTRUCTED_FRAME = (
+RECONSTRUCTED_AIRMAC_INIT_HANDSHAKE_FRAME = (
     AIRMAC_PROTOCOL_ID
     + RADIO_MODULE_ADDRESS
     + PAYLOAD_AND_HEADER
@@ -323,6 +328,11 @@ RECONSTRUCTED_FRAME = (
     +CRC_32
 )
 
+
+PAYLOAD_PROTOCOL_TP = b""
+
+TP_SYNC_INIT_FRAME = ()
+
 #
 f = 51 
 TEST = ( f"{f:02x}")
@@ -331,15 +341,44 @@ TEST = ( f"{f:02x}")
 async def send_task(phy: AsyncUDPManager, stats: Stats):
     count = 1
     while True:
-        FRAME = bytes.fromhex(RECONSTRUCTED_FRAME.hex())
-        # print(f"FRAME: {FRAME}")
-        bytey = count.to_bytes(1,byteorder="big")
-        byte_struct = struct.pack('128s', bytey)
-    
+        FRAME = bytes.fromhex(RECONSTRUCTED_AIRMAC_INIT_HANDSHAKE_FRAME.hex())
         await phy.write(FRAME)
         print(".", flush=True, end="")
         stats.tx += 1
         await asyncio.sleep(.1)
+
+
+
+
+async def handshake_loop(phy: AsyncUDPManager, stats: Stats):
+        """Continuously attempt handshake until success"""
+        print("[GS] Starting handshake loop...")
+        handshooken = 0
+        while True:
+            frame = bytes.fromhex(RECONSTRUCTED_AIRMAC_INIT_HANDSHAKE_FRAME.hex())
+            while handshooken == 0:
+                await phy.write(frame)
+                stats.tx += 1
+                print(".", end="", flush=True)
+
+                try:
+                    response = await asyncio.wait_for(phy.read(), timeout=2)
+
+                    print(" [RX]", end="", flush=True)
+
+                    if decode_response_packet(response):
+                        print("\n[GS] Handshake successful ")
+                        stats.rx += 1
+                        handshooken = 1
+                        return
+
+                except asyncio.TimeoutError:
+                    print(" [timeout]", end="", flush=True)
+
+            await asyncio.sleep(0.5)
+
+
+        
         
         
 
@@ -354,16 +393,17 @@ async def main(
     await phy.initialize()
 
     tasks = [] 
-    tasks.append(asyncio.create_task(stat_print_task(stats)))
-    if send:
+    #tasks.append(asyncio.create_task(stat_print_task(stats)))
+    #if send:
         # asyncio.create_task(mac_beacon(phy))
-        tasks.append(asyncio.create_task(send_task(phy, stats)))
+    #    tasks.append(asyncio.create_task(send_task(phy, stats)))
 
-    else:
-        tasks.append(asyncio.create_task(recieve_task(phy, stats)))
+    #else:
+    #   tasks.append(asyncio.create_task(recieve_task(phy, stats)))
     
 
     # asyncio.create_task(mac_task(phy))
+    tasks.append(asyncio.create_task(handshake_loop(phy, stats)))
 
     await asyncio.Event().wait()
 
