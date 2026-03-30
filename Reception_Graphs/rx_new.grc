@@ -667,7 +667,7 @@ blocks:
     bus_structure: null
     coordinate: [1912, 892.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: satellites_endurosat_deframer_1_0
   id: satellites_endurosat_deframer
   parameters:

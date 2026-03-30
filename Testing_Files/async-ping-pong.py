@@ -85,6 +85,8 @@ class AsyncUDPManager:
         self._tx_task = asyncio.create_task(self._tx_loop())
         self._rx_task = asyncio.create_task(self._rx_loop())
 
+
+
     async def _tx_loop(self):
         while True:
             data = await self.write_queue.get()
@@ -199,6 +201,21 @@ def gen_packet(data: str | bytes) -> bytes:
     # print(f"crc 16: {crc16(frame).to_bytes(2, 'big')}")
     hexdump(frame)
     return b"\xaa" * 5 + b"\x7e" + frame + crc16(frame).to_bytes(2, "big")
+
+def gen_airmac_header(data: str | bytes, protocol_id: bytes, length: bytes) -> bytes:
+    
+    proto_int = b""
+    match protocol_id:
+        case b"\x01":
+            proto_int = b"\x01"
+        case b"\x02": 
+            proto_int = b"\x02"
+        case b"\x03": 
+            proto_int = b"\x03"
+    
+    print (f"{proto_int + b"\x11" + length + crc16(proto_int + b"\x11" + length).to_bytes(2, "little")}")
+    print(f"{AIRMAC_PROTOCOL_ID + RADIO_MODULE_ADDRESS + PAYLOAD_AND_HEADER + HEADER_CRC}")
+    return proto_int + b"\x11" + length + crc16(proto_int + b"\x11" + length).to_bytes(2, "little")
 
 
 async def rx_consumer(phy: AsyncUDPManager):
@@ -328,10 +345,21 @@ RECONSTRUCTED_AIRMAC_INIT_HANDSHAKE_FRAME = (
     +CRC_32
 )
 
+PAKCET_ID = b"\x01\x00\x00\x00\x00\x00\x00\x00"
+PAYLOAD_PROTOCOL_TP = b"\x10"
+SYNC_FRAME_FLAG = b"\x14" #10
+HOST_CONTEXT = b"\x00\x00\x00\x00\x00\x00\x00\x00"
+TARGET_SYSTEM_TYPE = b"\x02\x00"
+TARGET_SYSTEM_ADDRESS = b"\x11\x00\x00\x00\x00\x00\x00\x00" #18
+TARGET_LOCAL_ADDRESS = b"\x00\x00\x00\x00\x00\x00\x00\x00"
+ENTIRE_TP_DATAGRAM_SIZE = b"\x01\x00\x00\x00" 
 
-PAYLOAD_PROTOCOL_TP = b""
 
-TP_SYNC_INIT_FRAME = ()
+#Sync frame needs to be encapsulated by Airmac Frame
+#Sync packet is 40 Bytes 
+AIRMAC_TP_PROTOCOL_HEADER_ID = b"\x03"
+TP_SYNC_FRAME = "03 11 2C 60 40 28 01 00 00 00 00 00 00 00 10 14 00 00 00 00 00 00 00 00 02 00 11 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 33 5E 07 6B"
+
 
 #
 f = 51 
@@ -370,16 +398,25 @@ async def handshake_loop(phy: AsyncUDPManager, stats: Stats):
                         print("\n[GS] Handshake successful ")
                         stats.rx += 1
                         handshooken = 1
+                        sync = bytes.fromhex(TP_SYNC_FRAME)
+                        await phy.write(sync)
+                        stats.tx += 1
+                        print(".", end="", flush=True)
                         return
 
                 except asyncio.TimeoutError:
                     print(" [timeout]", end="", flush=True)
+            
+            
 
             await asyncio.sleep(0.5)
 
-
-        
-        
+async def sync_spam(phy: AsyncUDPManager, stats: Stats):
+    while True:
+        sync = bytes.fromhex(TP_SYNC_FRAME)
+        await phy.write(sync)
+        print("#", end="", flush=True)
+        await asyncio.sleep(.5)
         
 
 ##################################################################################################################
@@ -392,6 +429,13 @@ async def main(
     phy = AsyncUDPManager(rx_port=rx_port, tx_addr=tx_addr)
     await phy.initialize()
 
+
+    gen_airmac_header( (AIRMAC_PROTOCOL_VERSION
+    + CUBESAT_ID
+    + GROUND_STATION_ID
+    + CAPABILITY_FLAGS
+    + SESSION_ID
+    +CRC_32), b"\x01", b"\x26")
     tasks = [] 
     #tasks.append(asyncio.create_task(stat_print_task(stats)))
     #if send:
@@ -404,6 +448,7 @@ async def main(
 
     # asyncio.create_task(mac_task(phy))
     tasks.append(asyncio.create_task(handshake_loop(phy, stats)))
+    tasks.append(asyncio.create_task(sync_spam(phy, stats)))
 
     await asyncio.Event().wait()
 
