@@ -128,7 +128,6 @@ class rx_new(gr.top_block, Qt.QWidget):
         self.set_soapy_rtlsdr_source_0_gain_mode(0, bool(False))
         self.set_soapy_rtlsdr_source_0_gain(0, 'TUNER', 20)
         self.satellites_endurosat_deframer_1_0 = satellites.components.deframers.endurosat_deframer(syncword_threshold=0, options="")
-        self.satellites_ax25_deframer_0 = satellites.components.deframers.ax25_deframer(g3ruh_scrambler=True, options="")
         self.qtgui_waterfall_sink_x_0_1_0 = qtgui.waterfall_sink_c(
             1024, #size
             window.WIN_BLACKMAN_hARRIS, #wintype
@@ -352,13 +351,11 @@ class rx_new(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
-        self.msg_connect((self.satellites_ax25_deframer_0, 'out'), (self.blocks_message_debug_0_0, 'print_pdu'))
         self.msg_connect((self.satellites_endurosat_deframer_1_0, 'out'), (self.blocks_message_debug_0_0, 'print_pdu'))
         self.msg_connect((self.satellites_endurosat_deframer_1_0, 'out'), (self.network_socket_pdu_0_1, 'pdus'))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.digital_symbol_sync_xx_0, 0))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.qtgui_time_sink_x_2, 0))
         self.connect((self.digital_symbol_sync_xx_0, 0), (self.qtgui_time_sink_x_2_1_0_1, 0))
-        self.connect((self.digital_symbol_sync_xx_0, 0), (self.satellites_ax25_deframer_0, 0))
         self.connect((self.digital_symbol_sync_xx_0, 0), (self.satellites_endurosat_deframer_1_0, 0))
         self.connect((self.filter_fft_low_pass_filter_0, 0), (self.analog_quadrature_demod_cf_0, 0))
         self.connect((self.filter_fft_low_pass_filter_0, 0), (self.qtgui_waterfall_sink_x_0_0, 0))
