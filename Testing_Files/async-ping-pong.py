@@ -8,6 +8,7 @@ from typing import Optional
 import struct
 
 import time
+import zlib
 
 
 # From ES UHF II USER MANUAL 2023
@@ -189,6 +190,10 @@ def crc16(data: bytes, *, init: int = 0xFFFF) -> int:
     # optional: add final XOR value here?
     return crc
 
+def crc32(data: bytes):
+    crc_output = zlib.crc32(data)
+    jamcrc_output = crc_output^0xFFFFFFFF
+    return jamcrc_output.to_bytes(4, "little")
 
 def gen_packet(data: str | bytes) -> bytes:
     """Gen packet."""
@@ -202,8 +207,10 @@ def gen_packet(data: str | bytes) -> bytes:
     hexdump(frame)
     return b"\xaa" * 5 + b"\x7e" + frame + crc16(frame).to_bytes(2, "big")
 
-def gen_airmac_header(data: str | bytes, protocol_id: bytes, length: bytes) -> bytes:
-    
+def gen_airmac_header(data: str | bytes, protocol_id: bytes) -> bytes:
+
+    lendat = len(data) 
+    length = (lendat + 4).to_bytes(1, "little")
     proto_int = b""
     match protocol_id:
         case b"\x01":
@@ -212,10 +219,20 @@ def gen_airmac_header(data: str | bytes, protocol_id: bytes, length: bytes) -> b
             proto_int = b"\x02"
         case b"\x03": 
             proto_int = b"\x03"
-    
-    print (f"{proto_int + b"\x11" + length + crc16(proto_int + b"\x11" + length).to_bytes(2, "little")}")
-    print(f"{AIRMAC_PROTOCOL_ID + RADIO_MODULE_ADDRESS + PAYLOAD_AND_HEADER + HEADER_CRC}")
+    print(f"{crc32(AIRMAC_PROTOCOL_ID + RADIO_MODULE_ADDRESS + PAYLOAD_AND_HEADER + HEADER_CRC + AIRMAC_PROTOCOL_VERSION + CUBESAT_ID + GROUND_STATION_ID + CAPABILITY_FLAGS + SESSION_ID).hex(" ").upper()}")
     return proto_int + b"\x11" + length + crc16(proto_int + b"\x11" + length).to_bytes(2, "little")
+
+def gen_airmac_footer(data: str | bytes) -> bytes:
+
+    return gen_airmac_header(data) + data + zlib.crc32(AIRMAC_PROTOCOL_ID
+    + RADIO_MODULE_ADDRESS
+    + PAYLOAD_AND_HEADER
+    + HEADER_CRC
+    + AIRMAC_PROTOCOL_VERSION
+    + CUBESAT_ID
+    + GROUND_STATION_ID
+    + CAPABILITY_FLAGS
+    + SESSION_ID)
 
 
 async def rx_consumer(phy: AsyncUDPManager):
@@ -434,8 +451,8 @@ async def main(
     + CUBESAT_ID
     + GROUND_STATION_ID
     + CAPABILITY_FLAGS
-    + SESSION_ID
-    +CRC_32), b"\x01", b"\x26")
+    + SESSION_ID), b"\x01")
+    
     tasks = [] 
     #tasks.append(asyncio.create_task(stat_print_task(stats)))
     #if send:
