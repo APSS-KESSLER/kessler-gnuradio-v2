@@ -185,28 +185,90 @@ blocks:
     coordinate: [448, 212.0]
     rotation: 0
     state: enabled
+- name: qtgui_waterfall_sink_x_0
+  id: qtgui_waterfall_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    axislabels: 'True'
+    bw: samp_rate
+    color1: '0'
+    color10: '0'
+    color2: '0'
+    color3: '0'
+    color4: '0'
+    color5: '0'
+    color6: '0'
+    color7: '0'
+    color8: '0'
+    color9: '0'
+    comment: ''
+    fc: '0'
+    fftsize: '1024'
+    freqhalf: 'True'
+    grid: 'False'
+    gui_hint: ''
+    int_max: '10'
+    int_min: '-140'
+    label1: ''
+    label10: ''
+    label2: ''
+    label3: ''
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    legend: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '""'
+    nconnections: '1'
+    showports: 'False'
+    type: complex
+    update_time: '0.10'
+    wintype: window.WIN_BLACKMAN_hARRIS
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [936, 292.0]
+    rotation: 0
+    state: enabled
 - name: soapy_hackrf_sink_0
   id: soapy_hackrf_sink
   parameters:
     affinity: ''
     alias: ''
-    amp: 'False'
+    amp: 'True'
     bandwidth: '0'
     center_freq: 436e6
     comment: ''
     dev_args: ''
     samp_rate: samp_rate
     type: fc32
-    vga: '16'
+    vga: '47'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1072, 216.0]
+    coordinate: [936, 216.0]
     rotation: 0
     state: enabled
 
 connections:
+- [digital_gfsk_mod_0, '0', qtgui_waterfall_sink_x_0, '0']
 - [digital_gfsk_mod_0, '0', soapy_hackrf_sink_0, '0']
 - [network_socket_pdu_0, pdus, blocks_message_debug_0, print_pdu]
 - [network_socket_pdu_0, pdus, pdu_pdu_to_stream_x_0, pdus]
