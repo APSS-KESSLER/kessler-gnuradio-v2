@@ -334,7 +334,7 @@ CAPTURED_HANDSHAKE_PACKET = (
     "00 00 00 00 00 00 00 00 00 04 00 00 00 00 00 00 00"
 )
 
-AIRMAC_PROTOCOL_ID = b"\x01"
+AIRMAC_PROTOCOL_ID = b"\x02"
 RADIO_MODULE_ADDRESS = b"\x11"
 PAYLOAD_AND_HEADER = b"\x26"
 HEADER_CRC = b"\x4a\x8f"
@@ -362,20 +362,47 @@ RECONSTRUCTED_AIRMAC_INIT_HANDSHAKE_FRAME = (
     +CRC_32
 )
 
-PAKCET_ID = b"\x01\x00\x00\x00\x00\x00\x00\x00"
+PACKET_ID = b"\x33\x00\x00\x00\x00\x00\x00\x00"
 PAYLOAD_PROTOCOL_TP = b"\x10"
-SYNC_FRAME_FLAG = b"\x14" #10
+SYNC_FRAME_FLAG = b"\x14" 
 HOST_CONTEXT = b"\x00\x00\x00\x00\x00\x00\x00\x00"
 TARGET_SYSTEM_TYPE = b"\x02\x00"
-TARGET_SYSTEM_ADDRESS = b"\x11\x00\x00\x00\x00\x00\x00\x00" #18
-TARGET_LOCAL_ADDRESS = b"\x00\x00\x00\x00\x00\x00\x00\x00"
-ENTIRE_TP_DATAGRAM_SIZE = b"\x01\x00\x00\x00" 
+TARGET_SYSTEM_ADDRESS = b"\x02\x00\x00\x00\x00\x00\x00\x00" 
+TARGET_LOCAL_ADDRESS = b"\x11\x00\x00\x00\x00\x00\x00\x00"
+ENTIRE_TP_DATAGRAM_SIZE = b"\x28\x00\x00\x00" 
 
+#according to spacedev the OBC NVM MAC address is 0x99 
 
 #Sync frame needs to be encapsulated by Airmac Frame
 #Sync packet is 40 Bytes 
 AIRMAC_TP_PROTOCOL_HEADER_ID = b"\x03"
-TP_SYNC_FRAME = "03 11 2C 60 40 28 01 00 00 00 00 00 00 00 10 14 00 00 00 00 00 00 00 00 02 00 11 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 33 5E 07 6B"
+SYNC_PACKET_PAYLOAD = (
+    PACKET_ID 
+    + PAYLOAD_PROTOCOL_TP
+    + SYNC_FRAME_FLAG
+    + HOST_CONTEXT
+    + TARGET_SYSTEM_TYPE
+    + TARGET_SYSTEM_ADDRESS
+    + TARGET_LOCAL_ADDRESS
+    + ENTIRE_TP_DATAGRAM_SIZE
+
+)
+
+TEST_PAYLOAD = (AIRMAC_PROTOCOL_VERSION
+    + CUBESAT_ID
+    + GROUND_STATION_ID
+    + CAPABILITY_FLAGS
+    + SESSION_ID)
+
+TEST_HANDSHAKE_ = gen_airmac_header(TEST_PAYLOAD, b"\x01")
+TEST_FOOTER = crc32((TEST_HANDSHAKE_ + TEST_PAYLOAD))
+TEST_FRAME = (TEST_HANDSHAKE_ + TEST_PAYLOAD + TEST_FOOTER)
+
+
+TP_SYNC = gen_airmac_header(SYNC_PACKET_PAYLOAD, b"\x03")
+TP_FOOTER = crc32((TP_SYNC + SYNC_PACKET_PAYLOAD))
+TP_SYNC_FRAME = TP_SYNC + SYNC_PACKET_PAYLOAD + TP_FOOTER
+
 
 
 #
@@ -383,24 +410,12 @@ f = 51
 TEST = ( f"{f:02x}")
 
 
-async def send_task(phy: AsyncUDPManager, stats: Stats):
-    count = 1
-    while True:
-        FRAME = bytes.fromhex(RECONSTRUCTED_AIRMAC_INIT_HANDSHAKE_FRAME.hex())
-        await phy.write(FRAME)
-        print(".", flush=True, end="")
-        stats.tx += 1
-        await asyncio.sleep(.1)
-
-
-
-
 async def handshake_loop(phy: AsyncUDPManager, stats: Stats):
         """Continuously attempt handshake until success"""
         print("[GS] Starting handshake loop...")
         handshooken = 0
         while True:
-            frame = bytes.fromhex(RECONSTRUCTED_AIRMAC_INIT_HANDSHAKE_FRAME.hex())
+            frame = bytes.fromhex(TEST_FRAME.hex())
             while handshooken == 0:
                 await phy.write(frame)
                 stats.tx += 1
@@ -415,25 +430,25 @@ async def handshake_loop(phy: AsyncUDPManager, stats: Stats):
                         print("\n[GS] Handshake successful ")
                         stats.rx += 1
                         handshooken = 1
-                        sync = bytes.fromhex(TP_SYNC_FRAME)
-                        await phy.write(sync)
-                        stats.tx += 1
-                        print(".", end="", flush=True)
-                        return
+                        
 
                 except asyncio.TimeoutError:
                     print(" [timeout]", end="", flush=True)
             
             
-
-            await asyncio.sleep(0.5)
+            sync = bytes.fromhex(TP_SYNC_FRAME.hex())
+            print("\n[GS] TP Sync Sent")
+            await phy.write(sync)
+            stats.tx += 1
+            print(".", end="", flush=True)
+            await asyncio.sleep(1)
 
 async def sync_spam(phy: AsyncUDPManager, stats: Stats):
     while True:
-        sync = bytes.fromhex(TP_SYNC_FRAME)
+        sync = bytes.fromhex(TP_SYNC_FRAME.hex())
         await phy.write(sync)
         print("#", end="", flush=True)
-        await asyncio.sleep(.5)
+        await asyncio.sleep(2)
         
 
 ##################################################################################################################
@@ -446,12 +461,6 @@ async def main(
     phy = AsyncUDPManager(rx_port=rx_port, tx_addr=tx_addr)
     await phy.initialize()
 
-
-    gen_airmac_header( (AIRMAC_PROTOCOL_VERSION
-    + CUBESAT_ID
-    + GROUND_STATION_ID
-    + CAPABILITY_FLAGS
-    + SESSION_ID), b"\x01")
     
     tasks = [] 
     #tasks.append(asyncio.create_task(stat_print_task(stats)))
@@ -465,7 +474,7 @@ async def main(
 
     # asyncio.create_task(mac_task(phy))
     tasks.append(asyncio.create_task(handshake_loop(phy, stats)))
-    tasks.append(asyncio.create_task(sync_spam(phy, stats)))
+    #tasks.append(asyncio.create_task(sync_spam(phy, stats)))
 
     await asyncio.Event().wait()
 

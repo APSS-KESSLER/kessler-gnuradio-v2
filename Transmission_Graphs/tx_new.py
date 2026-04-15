@@ -25,6 +25,7 @@ from gnuradio import network
 from gnuradio import pdu
 from gnuradio import soapy
 import math
+import sip
 import threading
 
 
@@ -90,8 +91,43 @@ class tx_new(gr.top_block, Qt.QWidget):
         self.soapy_hackrf_sink_0.set_sample_rate(0, samp_rate)
         self.soapy_hackrf_sink_0.set_bandwidth(0, 0)
         self.soapy_hackrf_sink_0.set_frequency(0, 436e6)
-        self.soapy_hackrf_sink_0.set_gain(0, 'AMP', False)
-        self.soapy_hackrf_sink_0.set_gain(0, 'VGA', min(max(16, 0.0), 47.0))
+        self.soapy_hackrf_sink_0.set_gain(0, 'AMP', True)
+        self.soapy_hackrf_sink_0.set_gain(0, 'VGA', min(max(47, 0.0), 47.0))
+        self.qtgui_waterfall_sink_x_0 = qtgui.waterfall_sink_c(
+            1024, #size
+            window.WIN_BLACKMAN_hARRIS, #wintype
+            0, #fc
+            samp_rate, #bw
+            "", #name
+            1, #number of inputs
+            None # parent
+        )
+        self.qtgui_waterfall_sink_x_0.set_update_time(0.10)
+        self.qtgui_waterfall_sink_x_0.enable_grid(False)
+        self.qtgui_waterfall_sink_x_0.enable_axis_labels(True)
+
+
+
+        labels = ['', '', '', '', '',
+                  '', '', '', '', '']
+        colors = [0, 0, 0, 0, 0,
+                  0, 0, 0, 0, 0]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+                  1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.qtgui_waterfall_sink_x_0.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_waterfall_sink_x_0.set_line_label(i, labels[i])
+            self.qtgui_waterfall_sink_x_0.set_color_map(i, colors[i])
+            self.qtgui_waterfall_sink_x_0.set_line_alpha(i, alphas[i])
+
+        self.qtgui_waterfall_sink_x_0.set_intensity_range(-140, 10)
+
+        self._qtgui_waterfall_sink_x_0_win = sip.wrapinstance(self.qtgui_waterfall_sink_x_0.qwidget(), Qt.QWidget)
+
+        self.top_layout.addWidget(self._qtgui_waterfall_sink_x_0_win)
         self.pdu_pdu_to_stream_x_0 = pdu.pdu_to_stream_b(pdu.EARLY_BURST_BALK, 64)
         self.network_socket_pdu_0 = network.socket_pdu('UDP_SERVER', "127.0.0.2", '2000', 10000, False)
         self.digital_gfsk_mod_0 = digital.gfsk_mod(
@@ -109,6 +145,7 @@ class tx_new(gr.top_block, Qt.QWidget):
         ##################################################
         self.msg_connect((self.network_socket_pdu_0, 'pdus'), (self.blocks_message_debug_0, 'print_pdu'))
         self.msg_connect((self.network_socket_pdu_0, 'pdus'), (self.pdu_pdu_to_stream_x_0, 'pdus'))
+        self.connect((self.digital_gfsk_mod_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
         self.connect((self.digital_gfsk_mod_0, 0), (self.soapy_hackrf_sink_0, 0))
         self.connect((self.pdu_pdu_to_stream_x_0, 0), (self.digital_gfsk_mod_0, 0))
 
@@ -141,6 +178,7 @@ class tx_new(gr.top_block, Qt.QWidget):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
         self.set_sensitivity((2 * math.pi * self.freq_deviation) / self.samp_rate)
+        self.qtgui_waterfall_sink_x_0.set_frequency_range(0, self.samp_rate)
         self.soapy_hackrf_sink_0.set_sample_rate(0, self.samp_rate)
 
     def get_freq_deviation(self):

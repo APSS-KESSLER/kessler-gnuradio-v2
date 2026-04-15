@@ -69,7 +69,7 @@ blocks:
     start: '0'
     step: '1'
     stop: '100'
-    value: '10'
+    value: '7'
     widget: counter_slider
   states:
     bus_sink: false
@@ -148,7 +148,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1344, 284.0]
+    coordinate: [1352, 276.0]
     rotation: 0
     state: enabled
 - name: baud_rate
@@ -180,7 +180,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [2192, 800.0]
+    coordinate: [2280, 504.0]
     rotation: 0
     state: enabled
 - name: digital_symbol_sync_xx_0
@@ -207,7 +207,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1584, 372.0]
+    coordinate: [1600, 372.0]
     rotation: 0
     state: enabled
 - name: filter_fft_low_pass_filter_0
@@ -231,7 +231,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1048, 228.0]
+    coordinate: [1048, 220.0]
     rotation: 0
     state: enabled
 - name: freq_xlating_fir_filter_xxx_0
@@ -251,7 +251,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [488, 268.0]
+    coordinate: [760, 252.0]
     rotation: 0
     state: enabled
 - name: network_socket_pdu_0_1
@@ -368,7 +368,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1584, 260.0]
+    coordinate: [1600, 252.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_2_1_0_1
@@ -465,7 +465,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1944, 564.0]
+    coordinate: [2024, 852.0]
     rotation: 0
     state: enabled
 - name: qtgui_waterfall_sink_x_0
@@ -526,7 +526,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1048, 124.0]
+    coordinate: [1048, 108.0]
     rotation: 0
     state: enabled
 - name: qtgui_waterfall_sink_x_0_0
@@ -587,7 +587,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1344, 180.0]
+    coordinate: [1344, 156.0]
     rotation: 0
     state: enabled
 - name: qtgui_waterfall_sink_x_0_1_0
@@ -648,7 +648,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [488, 372.0]
+    coordinate: [744, 372.0]
     rotation: 0
     state: enabled
 - name: satellites_ax25_deframer_0
@@ -665,9 +665,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1912, 892.0]
+    coordinate: [2024, 788.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: satellites_endurosat_deframer_1_0
   id: satellites_endurosat_deframer
   parameters:
@@ -682,7 +682,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1936, 380.0]
+    coordinate: [2032, 380.0]
     rotation: 0
     state: enabled
 - name: soapy_rtlsdr_source_0
@@ -706,7 +706,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [224, 268.0]
+    coordinate: [480, 252.0]
     rotation: 0
     state: enabled
 
