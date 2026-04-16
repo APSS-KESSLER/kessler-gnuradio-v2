@@ -11,41 +11,10 @@ import time
 import zlib
 
 
-# From ES UHF II USER MANUAL 2023
-UHF_PRE_PAYLOAD = 7  # Preamble + Sync + Payload Length
-UHF_POST_PAYLOAD = -2  # CRC
-
 RX_PORT = 2001
 TX_PORT = 2000
 TX_ADDR = "127.0.0.2"
 RX_ADDR = "127.0.0.1"
-
-AIRMAC_PROTOCOL_ID = b"\x01"
-RADIO_MODULE_ADDRESS = b"\x11"
-PAYLOAD_AND_HEADER = b"\x26"
-HEADER_CRC = b"\x4a\x8f"
-
-
-CUBESAT_ID = b"\x11\x00\x00\x00\x00\x00\x00\x00"
-GS_ID = b"\x00\x00\x00\x00\x00\x00\x00\x00"
-CAPABILITY_FLAGS = b"\x00\x00\x00\x00\x00\x00\x00\x00"
-SESSION_ID = b"\x01\x00\x00\x00\x00\x00\x00\x00"
-AIRMAC_PROTOCOL_VERSION = b"\x01\x00"
-
-CRC_32 = b"\x3d\x90\x20\x8f"
-
-PAYLOAD_BYTES = (
-    AIRMAC_PROTOCOL_ID
-    + RADIO_MODULE_ADDRESS
-    + PAYLOAD_AND_HEADER
-    + HEADER_CRC
-    + CUBESAT_ID
-    + GS_ID
-    + CAPABILITY_FLAGS
-    + SESSION_ID
-    + AIRMAC_PROTOCOL_VERSION
-)
-
 
 class AsyncUDPManager:
     def __init__(
@@ -72,6 +41,8 @@ class AsyncUDPManager:
 
         self._tx_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._rx_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        self._rx_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         self._rx_sock.setblocking(False)
         self._tx_sock.setblocking(False)
@@ -265,6 +236,11 @@ def decode_response_packet(data: bytes):
     if AIRMAC_DATA[0] ==  0x02:
         return True
 
+def decode_status_packet(data: bytes):
+    TP_SYNC = data[6]
+    if TP_SYNC == 0x33:
+        return True 
+
 
 ###########################################TESTING FUNCTIONALITY###############################################
 
@@ -300,39 +276,8 @@ async def stat_print_task(stats: Stats):
         await asyncio.sleep(stat_period // 4)
     
 
-async def recieve_task(phy: AsyncUDPManager, stats: Stats):
-    while True:
-        frame = await phy.read()
-        print("R", flush=True, end="")
-        stats.rx += 1
-        # print(f"frame: {frame}")
-        # for b in frame:
-        #     print(f"frame in Int = {b}")
 
 
-ENCRYPTED_CAPTURED_HANDSHAKE_FRAME = (
-    "51 a8 31 28 1e 48 06 81 05 47 6a 11 42 5f 1e d9 da 2c 74 8e 1b 64 a9 ef "
-    "6b 66 64 3c 15 5d 61 7f 46 53 36 83 f5 1f 05 7c f2 ae f1 4d e7 5b f6 54"
-)
-
-
-DECRYPTED_CAPTURED_HANDSHAKE_FRAME = (
-    "01 00 26 08 bf 01 00 22 00 00 00 00 00 00 00 00 00 00 00 00 00 00 "
-    "00 00 00 00 00 00 00 00 00 03 00 00 00 00 00 00 00 95 6a 96 76"
-)
-
-RANDOM_BULLSHIT_HANDSHAKE_FRAME = (
-    "26 fe f1 6e 90 a0 bc a5 6a fa f1 fe ce 45 2a 26 98 26 6d 24 d7 84 67 d4 64 03 db 11 76 71 76 9a 87 b5"
-)
-
-RANDOM_BULLSHIT_HANDSHAKE_FRAME_2 = (
-    "26 fe f1 6e 90 a0 bc a5 6a fa f1 fe ce 45 2a 26 98 26 6d 24 d7 84 67 d4 64 03 a9 52 2b 03 0f 14 23 be 01 80 a7 75 9b"
-)
-
-CAPTURED_HANDSHAKE_PACKET = (
-    "01 00 11 00 00 00 00 00 00 00 00 00 00 00 00 00 00 "
-    "00 00 00 00 00 00 00 00 00 04 00 00 00 00 00 00 00"
-)
 
 AIRMAC_PROTOCOL_ID = b"\x02"
 RADIO_MODULE_ADDRESS = b"\x11"
@@ -365,12 +310,16 @@ RECONSTRUCTED_AIRMAC_INIT_HANDSHAKE_FRAME = (
 PACKET_ID = b"\x33\x00\x00\x00\x00\x00\x00\x00"
 PAYLOAD_PROTOCOL_TP = b"\x10"
 SYNC_FRAME_FLAG = b"\x14" 
-HOST_CONTEXT = b"\x00\x00\x00\x00\x00\x00\x00\x00"
+HOST_CONTEXT = b"\x00\x04\x00\x00\x00\x00\x00\x00"
 TARGET_SYSTEM_TYPE = b"\x02\x00"
 TARGET_SYSTEM_ADDRESS = b"\x02\x00\x00\x00\x00\x00\x00\x00" 
 TARGET_LOCAL_ADDRESS = b"\x11\x00\x00\x00\x00\x00\x00\x00"
 ENTIRE_TP_DATAGRAM_SIZE = b"\x28\x00\x00\x00" 
 
+TEST_HOST_CONTEXT = b"\x11\x00\x00\x00\x33\x00\x00\x00"
+
+
+DATA_FRAME_FLAG = b"\x0A"
 #according to spacedev the OBC NVM MAC address is 0x99 
 
 #Sync frame needs to be encapsulated by Airmac Frame
@@ -388,26 +337,37 @@ SYNC_PACKET_PAYLOAD = (
 
 )
 
+TP_DATA_PACKET_PAYLOAD = (
+    PACKET_ID 
+    + PAYLOAD_PROTOCOL_TP
+    + DATA_FRAME_FLAG
+    + HOST_CONTEXT
+    + TARGET_SYSTEM_TYPE
+    + TARGET_SYSTEM_ADDRESS
+    + TARGET_LOCAL_ADDRESS
+    + ENTIRE_TP_DATAGRAM_SIZE
+
+)
+
 TEST_PAYLOAD = (AIRMAC_PROTOCOL_VERSION
     + CUBESAT_ID
     + GROUND_STATION_ID
     + CAPABILITY_FLAGS
     + SESSION_ID)
 
+
 TEST_HANDSHAKE_ = gen_airmac_header(TEST_PAYLOAD, b"\x01")
 TEST_FOOTER = crc32((TEST_HANDSHAKE_ + TEST_PAYLOAD))
 TEST_FRAME = (TEST_HANDSHAKE_ + TEST_PAYLOAD + TEST_FOOTER)
-
 
 TP_SYNC = gen_airmac_header(SYNC_PACKET_PAYLOAD, b"\x03")
 TP_FOOTER = crc32((TP_SYNC + SYNC_PACKET_PAYLOAD))
 TP_SYNC_FRAME = TP_SYNC + SYNC_PACKET_PAYLOAD + TP_FOOTER
 
+DATA_SYNC = gen_airmac_header(TP_DATA_PACKET_PAYLOAD, b"\x03")
+DATA_FOOTER = crc32((TP_SYNC + TP_DATA_PACKET_PAYLOAD))
+DATA_SYNC_FRAME = DATA_SYNC + TP_DATA_PACKET_PAYLOAD + DATA_FOOTER
 
-
-#
-f = 51 
-TEST = ( f"{f:02x}")
 
 
 async def handshake_loop(phy: AsyncUDPManager, stats: Stats):
@@ -437,8 +397,22 @@ async def handshake_loop(phy: AsyncUDPManager, stats: Stats):
             
             
             sync = bytes.fromhex(TP_SYNC_FRAME.hex())
+            #sync = bytes.fromhex(DIDDY_SYNC_FRAME.hex())
             print("\n[GS] TP Sync Sent")
             await phy.write(sync)
+            try:    
+                response = await asyncio.wait_for(phy.read(), timeout = 2)
+                print(" [RX]", end="", flush=True)
+                if decode_status_packet(response):
+                    sync = bytes.fromhex(DATA_SYNC_FRAME.hex())
+                    print("\n[GS] TP Status Packet Recieved")
+                    print("\n[GS] Data Masquerade Sync Sent")
+                    await phy.write(sync)
+                    stats.rx += 1
+                    stats.tx += 1
+            except asyncio.TimeoutError:
+                    print(" [t]", end="", flush=True)
+
             stats.tx += 1
             print(".", end="", flush=True)
             await asyncio.sleep(1)
