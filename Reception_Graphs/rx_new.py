@@ -80,7 +80,7 @@ class rx_new(gr.top_block, Qt.QWidget):
         self.rx_offset = rx_offset = 1000
         self.frequency_correction = frequency_correction = 7
         self.freq_deviation = freq_deviation = (mod_index * baud_rate) / 2
-        self.Decimation = Decimation = 5
+        self.Decimation = Decimation = 6
 
         ##################################################
         # Blocks
