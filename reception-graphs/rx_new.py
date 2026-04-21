@@ -78,15 +78,15 @@ class rx_new(gr.top_block, Qt.QWidget):
         self.variable_qtgui_range_1 = variable_qtgui_range_1 = 50
         self.samp_rate = samp_rate = 2e6
         self.rx_offset = rx_offset = 1000
-        self.frequency_correction = frequency_correction = 10
+        self.frequency_correction = frequency_correction = 7
         self.freq_deviation = freq_deviation = (mod_index * baud_rate) / 2
-        self.Decimation = Decimation = 5
+        self.Decimation = Decimation = 6
 
         ##################################################
         # Blocks
         ##################################################
 
-        self._frequency_correction_range = qtgui.Range(0, 100, 1, 10, 200)
+        self._frequency_correction_range = qtgui.Range(0, 100, 1, 7, 200)
         self._frequency_correction_win = qtgui.RangeWidget(self._frequency_correction_range, self.set_frequency_correction, "frequency correction", "counter_slider", float, QtCore.Qt.Horizontal)
         self.top_layout.addWidget(self._frequency_correction_win)
         self._variable_qtgui_range_1_range = qtgui.Range(0, 100, 1, 50, 200)
@@ -128,6 +128,7 @@ class rx_new(gr.top_block, Qt.QWidget):
         self.set_soapy_rtlsdr_source_0_gain_mode(0, bool(False))
         self.set_soapy_rtlsdr_source_0_gain(0, 'TUNER', 20)
         self.satellites_endurosat_deframer_1_0 = satellites.components.deframers.endurosat_deframer(syncword_threshold=0, options="")
+        self.satellites_ax25_deframer_0 = satellites.components.deframers.ax25_deframer(g3ruh_scrambler=True, options="")
         self.qtgui_waterfall_sink_x_0_1_0 = qtgui.waterfall_sink_c(
             1024, #size
             window.WIN_BLACKMAN_hARRIS, #wintype
@@ -163,41 +164,6 @@ class rx_new(gr.top_block, Qt.QWidget):
         self._qtgui_waterfall_sink_x_0_1_0_win = sip.wrapinstance(self.qtgui_waterfall_sink_x_0_1_0.qwidget(), Qt.QWidget)
 
         self.top_layout.addWidget(self._qtgui_waterfall_sink_x_0_1_0_win)
-        self.qtgui_waterfall_sink_x_0_1 = qtgui.waterfall_sink_c(
-            1024, #size
-            window.WIN_BLACKMAN_hARRIS, #wintype
-            0, #fc
-            samp_rate, #bw
-            "Mod Output", #name
-            1, #number of inputs
-            None # parent
-        )
-        self.qtgui_waterfall_sink_x_0_1.set_update_time(0.10)
-        self.qtgui_waterfall_sink_x_0_1.enable_grid(False)
-        self.qtgui_waterfall_sink_x_0_1.enable_axis_labels(True)
-
-
-
-        labels = ['', '', '', '', '',
-                  '', '', '', '', '']
-        colors = [0, 0, 0, 0, 0,
-                  0, 0, 0, 0, 0]
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-                  1.0, 1.0, 1.0, 1.0, 1.0]
-
-        for i in range(1):
-            if len(labels[i]) == 0:
-                self.qtgui_waterfall_sink_x_0_1.set_line_label(i, "Data {0}".format(i))
-            else:
-                self.qtgui_waterfall_sink_x_0_1.set_line_label(i, labels[i])
-            self.qtgui_waterfall_sink_x_0_1.set_color_map(i, colors[i])
-            self.qtgui_waterfall_sink_x_0_1.set_line_alpha(i, alphas[i])
-
-        self.qtgui_waterfall_sink_x_0_1.set_intensity_range(-140, 10)
-
-        self._qtgui_waterfall_sink_x_0_1_win = sip.wrapinstance(self.qtgui_waterfall_sink_x_0_1.qwidget(), Qt.QWidget)
-
-        self.top_layout.addWidget(self._qtgui_waterfall_sink_x_0_1_win)
         self.qtgui_waterfall_sink_x_0_0 = qtgui.waterfall_sink_c(
             1024, #size
             window.WIN_BLACKMAN_hARRIS, #wintype
@@ -386,18 +352,19 @@ class rx_new(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
+        self.msg_connect((self.satellites_ax25_deframer_0, 'out'), (self.blocks_message_debug_0_0, 'print_pdu'))
         self.msg_connect((self.satellites_endurosat_deframer_1_0, 'out'), (self.blocks_message_debug_0_0, 'print_pdu'))
         self.msg_connect((self.satellites_endurosat_deframer_1_0, 'out'), (self.network_socket_pdu_0_1, 'pdus'))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.digital_symbol_sync_xx_0, 0))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.qtgui_time_sink_x_2, 0))
         self.connect((self.digital_symbol_sync_xx_0, 0), (self.qtgui_time_sink_x_2_1_0_1, 0))
+        self.connect((self.digital_symbol_sync_xx_0, 0), (self.satellites_ax25_deframer_0, 0))
         self.connect((self.digital_symbol_sync_xx_0, 0), (self.satellites_endurosat_deframer_1_0, 0))
         self.connect((self.filter_fft_low_pass_filter_0, 0), (self.analog_quadrature_demod_cf_0, 0))
         self.connect((self.filter_fft_low_pass_filter_0, 0), (self.qtgui_waterfall_sink_x_0_0, 0))
         self.connect((self.freq_xlating_fir_filter_xxx_0, 0), (self.filter_fft_low_pass_filter_0, 0))
         self.connect((self.freq_xlating_fir_filter_xxx_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
         self.connect((self.soapy_rtlsdr_source_0, 0), (self.freq_xlating_fir_filter_xxx_0, 0))
-        self.connect((self.soapy_rtlsdr_source_0, 0), (self.qtgui_waterfall_sink_x_0_1, 0))
         self.connect((self.soapy_rtlsdr_source_0, 0), (self.qtgui_waterfall_sink_x_0_1_0, 0))
 
 
@@ -443,7 +410,6 @@ class rx_new(gr.top_block, Qt.QWidget):
         self.qtgui_time_sink_x_2.set_samp_rate(self.samp_rate)
         self.qtgui_waterfall_sink_x_0.set_frequency_range(0, self.samp_rate)
         self.qtgui_waterfall_sink_x_0_0.set_frequency_range(0, self.samp_rate)
-        self.qtgui_waterfall_sink_x_0_1.set_frequency_range(0, self.samp_rate)
         self.qtgui_waterfall_sink_x_0_1_0.set_frequency_range(0, self.samp_rate)
         self.soapy_rtlsdr_source_0.set_sample_rate(0, self.samp_rate)
 
