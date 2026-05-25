@@ -28,8 +28,6 @@ def ping():
             if line.startswith("# TXed"):
                 txcount = int(line.split(":")[-1].strip())
                 txevent.set()
-            
-            
     finally:
         proc.kill()
         proc.wait()
