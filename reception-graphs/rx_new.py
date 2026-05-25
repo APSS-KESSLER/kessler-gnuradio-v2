@@ -27,6 +27,7 @@ from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
 from gnuradio import network
 from gnuradio import soapy
+import gpredict
 import satellites.components.deframers
 import sip
 import threading
@@ -76,6 +77,7 @@ class rx_new(gr.top_block, Qt.QWidget):
         ##################################################
         self.mod_index = mod_index = 0.5
         self.variable_qtgui_range_1 = variable_qtgui_range_1 = 50
+        self.test_freq = test_freq = 0
         self.samp_rate = samp_rate = 2e6
         self.rx_offset = rx_offset = 1000
         self.frequency_correction = frequency_correction = 10
@@ -86,9 +88,6 @@ class rx_new(gr.top_block, Qt.QWidget):
         # Blocks
         ##################################################
 
-        self._frequency_correction_range = qtgui.Range(0, 100, 1, 10, 200)
-        self._frequency_correction_win = qtgui.RangeWidget(self._frequency_correction_range, self.set_frequency_correction, "frequency correction", "counter_slider", float, QtCore.Qt.Horizontal)
-        self.top_layout.addWidget(self._frequency_correction_win)
         self._variable_qtgui_range_1_range = qtgui.Range(0, 100, 1, 50, 200)
         self._variable_qtgui_range_1_win = qtgui.RangeWidget(self._variable_qtgui_range_1_range, self.set_variable_qtgui_range_1, "'variable_qtgui_range_1'", "counter_slider", float, QtCore.Qt.Horizontal)
         self.top_layout.addWidget(self._variable_qtgui_range_1_win)
@@ -122,7 +121,7 @@ class rx_new(gr.top_block, Qt.QWidget):
 
         self.soapy_rtlsdr_source_0.set_sample_rate(0, samp_rate)
         self.soapy_rtlsdr_source_0.set_frequency(0, 435e6)
-        self.soapy_rtlsdr_source_0.set_frequency_correction(0, frequency_correction)
+        self.soapy_rtlsdr_source_0.set_frequency_correction(0, test_freq)
         self.set_soapy_rtlsdr_source_0_bias(bool(False))
         self._soapy_rtlsdr_source_0_gain_value = 20
         self.set_soapy_rtlsdr_source_0_gain_mode(0, bool(False))
@@ -365,6 +364,11 @@ class rx_new(gr.top_block, Qt.QWidget):
         self._qtgui_time_sink_x_2_win = sip.wrapinstance(self.qtgui_time_sink_x_2.qwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_time_sink_x_2_win)
         self.network_socket_pdu_0_1 = network.socket_pdu('UDP_CLIENT', '127.0.0.1', '2003', 10000, False)
+        self.gpredict_doppler_0 = gpredict.doppler('127.0.0.1', 7356, False)
+        self.gpredict_MsgPairToVar_0 = gpredict.MsgPairToVar(self.set_test_freq)
+        self._frequency_correction_range = qtgui.Range(0, 100, 1, 10, 200)
+        self._frequency_correction_win = qtgui.RangeWidget(self._frequency_correction_range, self.set_frequency_correction, "frequency correction", "counter_slider", float, QtCore.Qt.Horizontal)
+        self.top_layout.addWidget(self._frequency_correction_win)
         self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(Decimation, firdes.low_pass(1,samp_rate,samp_rate/(2*Decimation), 1000), rx_offset, samp_rate)
         self.filter_fft_low_pass_filter_0 = filter.fft_filter_ccc(1, firdes.low_pass(1, (samp_rate // Decimation), (freq_deviation*5), 1e3, window.WIN_RECTANGULAR, 6.76), 1)
         self.digital_symbol_sync_xx_0 = digital.symbol_sync_ff(
@@ -380,12 +384,15 @@ class rx_new(gr.top_block, Qt.QWidget):
             128,
             [])
         self.blocks_message_debug_0_0 = blocks.message_debug(True, gr.log_levels.info)
+        self.blocks_message_debug_0 = blocks.message_debug(True, gr.log_levels.info)
         self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(((samp_rate//Decimation)/(2*math.pi*freq_deviation)))
 
 
         ##################################################
         # Connections
         ##################################################
+        self.msg_connect((self.gpredict_doppler_0, 'state'), (self.blocks_message_debug_0, 'log'))
+        self.msg_connect((self.gpredict_doppler_0, 'freq'), (self.gpredict_MsgPairToVar_0, 'inpair'))
         self.msg_connect((self.satellites_endurosat_deframer_1_0, 'out'), (self.blocks_message_debug_0_0, 'print_pdu'))
         self.msg_connect((self.satellites_endurosat_deframer_1_0, 'out'), (self.network_socket_pdu_0_1, 'pdus'))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.digital_symbol_sync_xx_0, 0))
@@ -431,6 +438,13 @@ class rx_new(gr.top_block, Qt.QWidget):
     def set_variable_qtgui_range_1(self, variable_qtgui_range_1):
         self.variable_qtgui_range_1 = variable_qtgui_range_1
 
+    def get_test_freq(self):
+        return self.test_freq
+
+    def set_test_freq(self, test_freq):
+        self.test_freq = test_freq
+        self.soapy_rtlsdr_source_0.set_frequency_correction(0, self.test_freq)
+
     def get_samp_rate(self):
         return self.samp_rate
 
@@ -459,7 +473,6 @@ class rx_new(gr.top_block, Qt.QWidget):
 
     def set_frequency_correction(self, frequency_correction):
         self.frequency_correction = frequency_correction
-        self.soapy_rtlsdr_source_0.set_frequency_correction(0, self.frequency_correction)
 
     def get_freq_deviation(self):
         return self.freq_deviation

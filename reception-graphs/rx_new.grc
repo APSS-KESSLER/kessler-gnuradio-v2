@@ -168,6 +168,21 @@ blocks:
     coordinate: [736, 12.0]
     rotation: 0
     state: enabled
+- name: blocks_message_debug_0
+  id: blocks_message_debug
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    en_uvec: 'True'
+    log_level: info
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [592, 536.0]
+    rotation: 0
+    state: enabled
 - name: blocks_message_debug_0_0
   id: blocks_message_debug
   parameters:
@@ -252,6 +267,38 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [488, 268.0]
+    rotation: 0
+    state: enabled
+- name: gpredict_MsgPairToVar_0
+  id: gpredict_MsgPairToVar
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    target: test_freq
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [320, 500.0]
+    rotation: 0
+    state: enabled
+- name: gpredict_doppler_0
+  id: gpredict_doppler
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    gpredict_host: 127.0.0.1
+    gpredict_port: '7356'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    verbose: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [64, 576.0]
     rotation: 0
     state: enabled
 - name: network_socket_pdu_0_1
@@ -740,7 +787,7 @@ blocks:
     center_freq: 435e6
     comment: ''
     dev_args: ''
-    freq_correction: frequency_correction
+    freq_correction: test_freq
     gain: '20'
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -763,6 +810,8 @@ connections:
 - [filter_fft_low_pass_filter_0, '0', qtgui_waterfall_sink_x_0_0, '0']
 - [freq_xlating_fir_filter_xxx_0, '0', filter_fft_low_pass_filter_0, '0']
 - [freq_xlating_fir_filter_xxx_0, '0', qtgui_waterfall_sink_x_0, '0']
+- [gpredict_doppler_0, freq, gpredict_MsgPairToVar_0, inpair]
+- [gpredict_doppler_0, state, blocks_message_debug_0, log]
 - [satellites_endurosat_deframer_1_0, out, blocks_message_debug_0_0, print_pdu]
 - [satellites_endurosat_deframer_1_0, out, network_socket_pdu_0_1, pdus]
 - [soapy_rtlsdr_source_0, '0', freq_xlating_fir_filter_xxx_0, '0']
