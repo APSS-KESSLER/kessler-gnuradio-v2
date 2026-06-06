@@ -1,16 +1,13 @@
 from PIL import Image
 
-# This is a standard JPEG to compare to, it uses 70% quality factor like Software team
-img_webp = Image.open('NY.webp')
-img_webp.save('NY.png')
+# This is a standard JPEG to compare to, it uses  %quality factor like Software team
+img_webp = Image.open('images/NY.webp')
+img_webp.save('images/NY.png')
 
-img_png = Image.open('NY.png')
-img_png.save('standard_modified_NY.jpg', quality=70)
+img_png = Image.open('images/NY.png')
+img_png.save('images/standard_modified_NY.jpg', quality=70)
 
-img_jpg = Image.open('standard_modified_NY.jpg')
-print("---------------------BELOW ARE 70% IMG Q-TABLES-------------------------")
-q_tables = img_jpg.quantization
-print(q_tables)
+img_jpg = Image.open('images/standard_modified_NY.jpg')
 
 # This standard set up allows us to replicate Pillow's default JPEG 70% quality set up.
 # Mainly was used for debugging purposes to ensure no extra bytes were added to our cusotmised
@@ -37,7 +34,7 @@ standard_q_tables = [standard_luma_table, standard_chroma_table]
 
 
 
-img_my = Image.open('NY.png')
+img_my = Image.open('images/NY.png')
 
 
 
@@ -72,18 +69,62 @@ second_custom_chroma_table = [6, 6, 6, 6, 8, 8, 9, 10,
                               9, 9, 9, 9, 10, 10, 10, 10,
                               10, 10, 10, 10, 10, 10, 10, 10]
 
-third_custom_luma_table = [13, 17, 21, 39, 45, 81, 65, 75,
-                           24, 32, 0, 19, 45, 113, 110, 54,
-                           19, 29, 50, 57, 75, 105, 115, 70,
-                           18, 40, 27, 45, 89, 109, 119, 61,
-                           28, 47, 56, 115, 131, 127, 128,  69,
-                           56, 35, 77, 118, 161, 171, 87, 109,
-                           87, 125, 105, 138, 163, 167, 182, 137,
-                           117, 146, 156, 180, 138, 136, 147, 118]
+# These are the custom quantization tables from the (3) 'simulated
+# annealing for JPEG' paper.
+third_custom_luma_table_35 = [11, 35, 35, 53, 61, 63, 47, 69,
+                              35, 41, 39, 54, 54, 57, 44, 47, 
+                              44, 51, 61, 65, 48, 62, 79, 63, 
+                              38, 53, 60, 57, 58, 96, 102, 76, 
+                              44, 58, 68, 57, 81, 100, 96, 76, 
+                              74, 60, 62, 72, 98, 121, 94, 110, 
+                              55, 47, 91, 89, 81, 130, 102, 105, 
+                              96, 106, 107, 100, 79, 87, 97, 103]
+third_custom_luma_table_50 = [8, 30, 64, 86, 105, 97, 95, 70, 
+                              31, 58, 78, 99, 88, 79, 73, 65, 
+                              52, 66, 93, 103, 81, 83, 86, 70, 
+                              70, 87, 94, 79, 80, 79, 104, 71, 
+                              75, 98, 71, 91, 74, 111, 111, 83, 
+                              92, 81, 71, 71, 69, 101, 142, 93, 
+                              84, 82, 79, 64, 83, 120, 113, 103, 
+                              100, 93, 127, 115, 128, 116, 69, 108]
+third_custom_luma_table_75 = [8, 22, 39, 43, 74, 67, 63, 65,
+                              34, 55, 48, 51, 76, 65, 77, 55,
+                              33, 42, 50, 57, 77, 75, 68, 47, 
+                              58, 44, 60, 82, 78, 123, 76, 68, 
+                              50, 74, 71, 91, 84, 103, 91, 66, 
+                              50, 52, 53, 71, 73, 72, 137, 97, 
+                              48, 66, 82, 66, 102, 154, 119, 96, 
+                              100, 72, 92, 86, 94, 82, 124, 90]
+third_custom_luma_table_95 = [8, 13, 16, 25, 39, 68, 95, 74, 
+                              13, 19, 47, 17, 49, 65, 79, 69, 
+                              19, 15, 36, 23, 67, 95, 79, 58, 
+                              15, 39, 30, 85, 79, 127, 128, 77, 
+                              27, 47, 55, 75, 122, 174, 116, 76,
+                              45, 87, 75, 86, 102, 167, 178, 105, 
+                              71, 96, 113, 115, 139, 156, 151, 122, 
+                              137, 131, 161, 140, 176, 115, 132, 125]
+
+# This is from libvips library (Table tuned for PSNR-HVS-M on Kodak image set),
+# on the doc this should be (4)
+foruth_custom_luma_table_HVS = [9, 10, 12, 14, 19, 26, 38, 57,
+                                10, 12, 14, 19, 26, 38, 57, 86,
+                                12, 14, 19, 26, 38, 57, 86, 129,
+                                14, 19, 26, 38, 57, 86, 129, 193,
+                                19, 26, 38, 57, 86, 129, 193, 289,
+                                26, 38, 57, 86, 129, 193, 289, 433,
+                                38, 57, 86, 129, 193, 289, 433, 650,
+                                57, 86, 129, 193, 289, 433, 650, 975]
+foruth_custom_luma_table_MSSIM = [9, 9, 10, 12, 13, 17, 23, 31,
+                                  9, 11, 11, 12, 15, 19, 25, 33,
+                                  10, 11, 13, 15, 18, 23, 29, 39,
+                                  12, 12, 15, 18, 22, 27, 34, 46,
+                                  13, 15, 18, 22, 28, 34, 43, 58,
+                                  17, 19, 23, 27, 34, 44, 55, 74,
+                                  23, 25, 29, 34, 43, 55, 73, 100,
+                                  31, 33, 39, 46, 58, 74, 100, 139]
 
 
 # Currently set JPEG Q-table for 
+custom_q_tables = [foruth_custom_luma_table_MSSIM, standard_chroma_table]
 
-custom_q_tables = [third_custom_luma_table, third_custom_luma_table]
-
-img_my.save('custom_modified_NY.jpg', qtables=custom_q_tables)
+img_my.save('images/custom_modified_NY.jpg', qtables=custom_q_tables)
