@@ -27,7 +27,9 @@ from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
 from gnuradio import network
 from gnuradio import soapy
-import gpredict
+import rx_new_epy_block_0 as epy_block_0  # embedded python block
+import rx_new_epy_block_1 as epy_block_1  # embedded python block
+import rx_new_epy_module_0 as epy_module_0  # embedded python module
 import satellites.components.deframers
 import sip
 import threading
@@ -76,21 +78,23 @@ class rx_new(gr.top_block, Qt.QWidget):
         # Variables
         ##################################################
         self.mod_index = mod_index = 0.5
-        self.variable_qtgui_range_1 = variable_qtgui_range_1 = 50
-        self.test_freq = test_freq = 0
         self.samp_rate = samp_rate = 2e6
         self.rx_offset = rx_offset = 1000
-        self.frequency_correction = frequency_correction = 10
+        self.frequency_correction = frequency_correction = 7
         self.freq_deviation = freq_deviation = (mod_index * baud_rate) / 2
+        self.TED_gain = TED_gain = 0.1
         self.Decimation = Decimation = 5
 
         ##################################################
         # Blocks
         ##################################################
 
-        self._variable_qtgui_range_1_range = qtgui.Range(0, 100, 1, 50, 200)
-        self._variable_qtgui_range_1_win = qtgui.RangeWidget(self._variable_qtgui_range_1_range, self.set_variable_qtgui_range_1, "'variable_qtgui_range_1'", "counter_slider", float, QtCore.Qt.Horizontal)
-        self.top_layout.addWidget(self._variable_qtgui_range_1_win)
+        self._frequency_correction_range = qtgui.Range(0, 100, 1, 7, 200)
+        self._frequency_correction_win = qtgui.RangeWidget(self._frequency_correction_range, self.set_frequency_correction, "frequency correction", "counter_slider", float, QtCore.Qt.Horizontal)
+        self.top_layout.addWidget(self._frequency_correction_win)
+        self._TED_gain_range = qtgui.Range(0, 1, 0.01, 0.1, 200)
+        self._TED_gain_win = qtgui.RangeWidget(self._TED_gain_range, self.set_TED_gain, "TED_gain", "counter_slider", float, QtCore.Qt.Horizontal)
+        self.top_layout.addWidget(self._TED_gain_win)
         self.soapy_rtlsdr_source_0 = None
         dev = 'driver=rtlsdr'
         stream_args = 'bufflen=16384'
@@ -121,12 +125,13 @@ class rx_new(gr.top_block, Qt.QWidget):
 
         self.soapy_rtlsdr_source_0.set_sample_rate(0, samp_rate)
         self.soapy_rtlsdr_source_0.set_frequency(0, 435e6)
-        self.soapy_rtlsdr_source_0.set_frequency_correction(0, test_freq)
+        self.soapy_rtlsdr_source_0.set_frequency_correction(0, frequency_correction)
         self.set_soapy_rtlsdr_source_0_bias(bool(False))
         self._soapy_rtlsdr_source_0_gain_value = 20
         self.set_soapy_rtlsdr_source_0_gain_mode(0, bool(False))
         self.set_soapy_rtlsdr_source_0_gain(0, 'TUNER', 20)
         self.satellites_endurosat_deframer_1_0 = satellites.components.deframers.endurosat_deframer(syncword_threshold=0, options="")
+        self.satellites_ax25_deframer_1 = satellites.components.deframers.ax25_deframer(g3ruh_scrambler=True, options="")
         self.qtgui_waterfall_sink_x_0_1_0 = qtgui.waterfall_sink_c(
             1024, #size
             window.WIN_BLACKMAN_hARRIS, #wintype
@@ -162,41 +167,6 @@ class rx_new(gr.top_block, Qt.QWidget):
         self._qtgui_waterfall_sink_x_0_1_0_win = sip.wrapinstance(self.qtgui_waterfall_sink_x_0_1_0.qwidget(), Qt.QWidget)
 
         self.top_layout.addWidget(self._qtgui_waterfall_sink_x_0_1_0_win)
-        self.qtgui_waterfall_sink_x_0_1 = qtgui.waterfall_sink_c(
-            1024, #size
-            window.WIN_BLACKMAN_hARRIS, #wintype
-            0, #fc
-            samp_rate, #bw
-            "Mod Output", #name
-            1, #number of inputs
-            None # parent
-        )
-        self.qtgui_waterfall_sink_x_0_1.set_update_time(0.10)
-        self.qtgui_waterfall_sink_x_0_1.enable_grid(False)
-        self.qtgui_waterfall_sink_x_0_1.enable_axis_labels(True)
-
-
-
-        labels = ['', '', '', '', '',
-                  '', '', '', '', '']
-        colors = [0, 0, 0, 0, 0,
-                  0, 0, 0, 0, 0]
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-                  1.0, 1.0, 1.0, 1.0, 1.0]
-
-        for i in range(1):
-            if len(labels[i]) == 0:
-                self.qtgui_waterfall_sink_x_0_1.set_line_label(i, "Data {0}".format(i))
-            else:
-                self.qtgui_waterfall_sink_x_0_1.set_line_label(i, labels[i])
-            self.qtgui_waterfall_sink_x_0_1.set_color_map(i, colors[i])
-            self.qtgui_waterfall_sink_x_0_1.set_line_alpha(i, alphas[i])
-
-        self.qtgui_waterfall_sink_x_0_1.set_intensity_range(-140, 10)
-
-        self._qtgui_waterfall_sink_x_0_1_win = sip.wrapinstance(self.qtgui_waterfall_sink_x_0_1.qwidget(), Qt.QWidget)
-
-        self.top_layout.addWidget(self._qtgui_waterfall_sink_x_0_1_win)
         self.qtgui_waterfall_sink_x_0_0 = qtgui.waterfall_sink_c(
             1024, #size
             window.WIN_BLACKMAN_hARRIS, #wintype
@@ -281,7 +251,7 @@ class rx_new(gr.top_block, Qt.QWidget):
 
         self.qtgui_time_sink_x_2_1_0_1.enable_tags(True)
         self.qtgui_time_sink_x_2_1_0_1.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
-        self.qtgui_time_sink_x_2_1_0_1.enable_autoscale(False)
+        self.qtgui_time_sink_x_2_1_0_1.enable_autoscale(True)
         self.qtgui_time_sink_x_2_1_0_1.enable_grid(False)
         self.qtgui_time_sink_x_2_1_0_1.enable_axis_labels(True)
         self.qtgui_time_sink_x_2_1_0_1.enable_control_panel(False)
@@ -364,19 +334,16 @@ class rx_new(gr.top_block, Qt.QWidget):
         self._qtgui_time_sink_x_2_win = sip.wrapinstance(self.qtgui_time_sink_x_2.qwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_time_sink_x_2_win)
         self.network_socket_pdu_0_1 = network.socket_pdu('UDP_CLIENT', '127.0.0.1', '2003', 10000, False)
-        self.gpredict_doppler_0 = gpredict.doppler('127.0.0.1', 7356, False)
-        self.gpredict_MsgPairToVar_0 = gpredict.MsgPairToVar(self.set_test_freq)
-        self._frequency_correction_range = qtgui.Range(0, 100, 1, 10, 200)
-        self._frequency_correction_win = qtgui.RangeWidget(self._frequency_correction_range, self.set_frequency_correction, "frequency correction", "counter_slider", float, QtCore.Qt.Horizontal)
-        self.top_layout.addWidget(self._frequency_correction_win)
         self.freq_xlating_fir_filter_xxx_0 = filter.freq_xlating_fir_filter_ccc(Decimation, firdes.low_pass(1,samp_rate,samp_rate/(2*Decimation), 1000), rx_offset, samp_rate)
         self.filter_fft_low_pass_filter_0 = filter.fft_filter_ccc(1, firdes.low_pass(1, (samp_rate // Decimation), (freq_deviation*5), 1e3, window.WIN_RECTANGULAR, 6.76), 1)
+        self.epy_block_1 = epy_block_1.pdu_ax25_byte_prepender_filter()
+        self.epy_block_0 = epy_block_0.pdu_second_byte_filter()
         self.digital_symbol_sync_xx_0 = digital.symbol_sync_ff(
             digital.TED_EARLY_LATE,
             (((samp_rate // Decimation) // baud_rate)),
-            0.1,
-            1.0,
-            0.1,
+            0.0628,
+            1,
+            TED_gain,
             1.5,
             1,
             digital.constellation_bpsk().base(),
@@ -391,20 +358,22 @@ class rx_new(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
-        self.msg_connect((self.gpredict_doppler_0, 'state'), (self.blocks_message_debug_0, 'log'))
-        self.msg_connect((self.gpredict_doppler_0, 'freq'), (self.gpredict_MsgPairToVar_0, 'inpair'))
-        self.msg_connect((self.satellites_endurosat_deframer_1_0, 'out'), (self.blocks_message_debug_0_0, 'print_pdu'))
-        self.msg_connect((self.satellites_endurosat_deframer_1_0, 'out'), (self.network_socket_pdu_0_1, 'pdus'))
+        self.msg_connect((self.epy_block_0, 'out'), (self.network_socket_pdu_0_1, 'pdus'))
+        self.msg_connect((self.epy_block_1, 'out'), (self.network_socket_pdu_0_1, 'pdus'))
+        self.msg_connect((self.satellites_ax25_deframer_1, 'out'), (self.blocks_message_debug_0, 'print'))
+        self.msg_connect((self.satellites_ax25_deframer_1, 'out'), (self.epy_block_1, 'in'))
+        self.msg_connect((self.satellites_endurosat_deframer_1_0, 'out'), (self.blocks_message_debug_0_0, 'print'))
+        self.msg_connect((self.satellites_endurosat_deframer_1_0, 'out'), (self.epy_block_0, 'in'))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.digital_symbol_sync_xx_0, 0))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.qtgui_time_sink_x_2, 0))
         self.connect((self.digital_symbol_sync_xx_0, 0), (self.qtgui_time_sink_x_2_1_0_1, 0))
+        self.connect((self.digital_symbol_sync_xx_0, 0), (self.satellites_ax25_deframer_1, 0))
         self.connect((self.digital_symbol_sync_xx_0, 0), (self.satellites_endurosat_deframer_1_0, 0))
         self.connect((self.filter_fft_low_pass_filter_0, 0), (self.analog_quadrature_demod_cf_0, 0))
         self.connect((self.filter_fft_low_pass_filter_0, 0), (self.qtgui_waterfall_sink_x_0_0, 0))
         self.connect((self.freq_xlating_fir_filter_xxx_0, 0), (self.filter_fft_low_pass_filter_0, 0))
         self.connect((self.freq_xlating_fir_filter_xxx_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
         self.connect((self.soapy_rtlsdr_source_0, 0), (self.freq_xlating_fir_filter_xxx_0, 0))
-        self.connect((self.soapy_rtlsdr_source_0, 0), (self.qtgui_waterfall_sink_x_0_1, 0))
         self.connect((self.soapy_rtlsdr_source_0, 0), (self.qtgui_waterfall_sink_x_0_1_0, 0))
 
 
@@ -432,19 +401,6 @@ class rx_new(gr.top_block, Qt.QWidget):
         self.mod_index = mod_index
         self.set_freq_deviation((self.mod_index * self.baud_rate) / 2)
 
-    def get_variable_qtgui_range_1(self):
-        return self.variable_qtgui_range_1
-
-    def set_variable_qtgui_range_1(self, variable_qtgui_range_1):
-        self.variable_qtgui_range_1 = variable_qtgui_range_1
-
-    def get_test_freq(self):
-        return self.test_freq
-
-    def set_test_freq(self, test_freq):
-        self.test_freq = test_freq
-        self.soapy_rtlsdr_source_0.set_frequency_correction(0, self.test_freq)
-
     def get_samp_rate(self):
         return self.samp_rate
 
@@ -457,7 +413,6 @@ class rx_new(gr.top_block, Qt.QWidget):
         self.qtgui_time_sink_x_2.set_samp_rate(self.samp_rate)
         self.qtgui_waterfall_sink_x_0.set_frequency_range(0, self.samp_rate)
         self.qtgui_waterfall_sink_x_0_0.set_frequency_range(0, self.samp_rate)
-        self.qtgui_waterfall_sink_x_0_1.set_frequency_range(0, self.samp_rate)
         self.qtgui_waterfall_sink_x_0_1_0.set_frequency_range(0, self.samp_rate)
         self.soapy_rtlsdr_source_0.set_sample_rate(0, self.samp_rate)
 
@@ -473,6 +428,7 @@ class rx_new(gr.top_block, Qt.QWidget):
 
     def set_frequency_correction(self, frequency_correction):
         self.frequency_correction = frequency_correction
+        self.soapy_rtlsdr_source_0.set_frequency_correction(0, self.frequency_correction)
 
     def get_freq_deviation(self):
         return self.freq_deviation
@@ -481,6 +437,13 @@ class rx_new(gr.top_block, Qt.QWidget):
         self.freq_deviation = freq_deviation
         self.analog_quadrature_demod_cf_0.set_gain(((self.samp_rate//self.Decimation)/(2*math.pi*self.freq_deviation)))
         self.filter_fft_low_pass_filter_0.set_taps(firdes.low_pass(1, (self.samp_rate // self.Decimation), (self.freq_deviation*5), 1e3, window.WIN_RECTANGULAR, 6.76))
+
+    def get_TED_gain(self):
+        return self.TED_gain
+
+    def set_TED_gain(self, TED_gain):
+        self.TED_gain = TED_gain
+        self.digital_symbol_sync_xx_0.set_ted_gain(self.TED_gain)
 
     def get_Decimation(self):
         return self.Decimation
