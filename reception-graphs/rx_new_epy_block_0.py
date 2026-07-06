@@ -9,7 +9,7 @@ class pdu_second_byte_filter(gr.basic_block):
     def __init__(self):
         gr.basic_block.__init__(
             self,
-            name="pdu_second_byte_filter",
+            name="PDU Appender Filter",
             in_sig=None,
             out_sig=None
         )

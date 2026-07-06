@@ -37,7 +37,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: 436e6
+    value: 435.5e6
   states:
     bus_sink: false
     bus_source: false
@@ -146,38 +146,6 @@ blocks:
     coordinate: [680, 196.0]
     rotation: 0
     state: enabled
-- name: gpredict_MsgPairToVar_0
-  id: gpredict_MsgPairToVar
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    target: freq
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1032, 412.0]
-    rotation: 0
-    state: enabled
-- name: gpredict_doppler_0
-  id: gpredict_doppler
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    gpredict_host: 127.0.0.1
-    gpredict_port: '7356'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    verbose: 'False'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [672, 416.0]
-    rotation: 0
-    state: enabled
 - name: import_0
   id: import
   parameters:
@@ -234,14 +202,14 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    amp: 'False'
+    amp: 'True'
     bandwidth: '0'
     center_freq: freq
     comment: ''
     dev_args: ''
     samp_rate: samp_rate
     type: fc32
-    vga: '16'
+    vga: '47'
   states:
     bus_sink: false
     bus_source: false
@@ -252,7 +220,6 @@ blocks:
 
 connections:
 - [digital_gfsk_mod_0, '0', soapy_hackrf_sink_0, '0']
-- [gpredict_doppler_0, freq, gpredict_MsgPairToVar_0, inpair]
 - [network_socket_pdu_0, pdus, blocks_message_debug_0, print_pdu]
 - [network_socket_pdu_0, pdus, pdu_pdu_to_stream_x_0, pdus]
 - [pdu_pdu_to_stream_x_0, '0', digital_gfsk_mod_0, '0']

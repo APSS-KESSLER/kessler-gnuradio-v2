@@ -148,7 +148,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [808, 352.0]
+    coordinate: [800, 360.0]
     rotation: 0
     state: enabled
 - name: baud_rate
@@ -231,8 +231,8 @@ blocks:
     _source_code: "import pmt\nfrom gnuradio import gr\n\nclass pdu_second_byte_filter(gr.basic_block):\n\
       \    \"\"\"\n    pass PDUs only if second byte == 0xFE\n    \"\"\"\n\n    def\
       \ __init__(self):\n        gr.basic_block.__init__(\n            self,\n   \
-      \         name=\"pdu_second_byte_filter\",\n            in_sig=None,\n     \
-      \       out_sig=None\n        )\n\n        # Message ports\n        self.message_port_register_in(pmt.intern(\"\
+      \         name=\"PDU Appender Filter\",\n            in_sig=None,\n        \
+      \    out_sig=None\n        )\n\n        # Message ports\n        self.message_port_register_in(pmt.intern(\"\
       in\"))\n        self.message_port_register_out(pmt.intern(\"out\"))\n\n    \
       \    self.set_msg_handler(pmt.intern(\"in\"), self.handle_msg)\n\n    def handle_msg(self,\
       \ msg):\n        # Expect (metadata . u8vector)\n        if not pmt.is_pair(msg):\n\
@@ -250,7 +250,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
   states:
-    _io_cache: ('pdu_second_byte_filter', 'pdu_second_byte_filter', [], [('in', 'message',
+    _io_cache: ('PDU Appender Filter', 'pdu_second_byte_filter', [], [('in', 'message',
       1)], [('out', 'message', 1)], '\npass PDUs only if second byte == 0xFE\n', [])
     bus_sink: false
     bus_source: false
@@ -264,8 +264,8 @@ blocks:
     _source_code: "import pmt\nfrom gnuradio import gr\n\nclass pdu_ax25_byte_prepender_filter(gr.basic_block):\n\
       \    \"\"\"\n    pass PDUs only if second byte == 0xA2\n    \"\"\"\n\n    def\
       \ __init__(self):\n        gr.basic_block.__init__(\n            self,\n   \
-      \         name=\"pdu_second_byte_filter\",\n            in_sig=None,\n     \
-      \       out_sig=None\n        )\n\n        # Message ports\n        self.message_port_register_in(pmt.intern(\"\
+      \         name=\"PDU Ax25 Prepender\",\n            in_sig=None,\n         \
+      \   out_sig=None\n        )\n\n        # Message ports\n        self.message_port_register_in(pmt.intern(\"\
       in\"))\n        self.message_port_register_out(pmt.intern(\"out\"))\n\n    \
       \    self.set_msg_handler(pmt.intern(\"in\"), self.handle_msg)\n\n    def handle_msg(self,\
       \ msg):\n        if not pmt.is_pair(msg):\n            return\n\n        meta\
@@ -282,26 +282,13 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
   states:
-    _io_cache: ('pdu_second_byte_filter', 'pdu_ax25_byte_prepender_filter', [], [('in',
+    _io_cache: ('PDU Ax25 Prepender', 'pdu_ax25_byte_prepender_filter', [], [('in',
       'message', 1)], [('out', 'message', 1)], '\npass PDUs only if second byte ==
       0xA2\n', [])
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1680, 304.0]
-    rotation: 0
-    state: enabled
-- name: epy_module_0
-  id: epy_module
-  parameters:
-    alias: ''
-    comment: ''
-    source_code: '# this module will be imported in the into your flowgraph'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1512, 584.0]
+    coordinate: [1672, 304.0]
     rotation: 0
     state: enabled
 - name: filter_fft_low_pass_filter_0
@@ -810,6 +797,7 @@ connections:
 - [digital_symbol_sync_xx_0, '0', qtgui_time_sink_x_2_1_0_1, '0']
 - [digital_symbol_sync_xx_0, '0', satellites_ax25_deframer_1, '0']
 - [digital_symbol_sync_xx_0, '0', satellites_endurosat_deframer_1_0, '0']
+- [epy_block_0, out, blocks_message_debug_0_0, print]
 - [epy_block_0, out, network_socket_pdu_0_1, pdus]
 - [epy_block_1, out, network_socket_pdu_0_1, pdus]
 - [filter_fft_low_pass_filter_0, '0', analog_quadrature_demod_cf_0, '0']
@@ -818,7 +806,6 @@ connections:
 - [freq_xlating_fir_filter_xxx_0, '0', qtgui_waterfall_sink_x_0, '0']
 - [satellites_ax25_deframer_1, out, blocks_message_debug_0, print]
 - [satellites_ax25_deframer_1, out, epy_block_1, in]
-- [satellites_endurosat_deframer_1_0, out, blocks_message_debug_0_0, print]
 - [satellites_endurosat_deframer_1_0, out, epy_block_0, in]
 - [soapy_rtlsdr_source_0, '0', freq_xlating_fir_filter_xxx_0, '0']
 - [soapy_rtlsdr_source_0, '0', qtgui_waterfall_sink_x_0_1_0, '0']

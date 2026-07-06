@@ -29,7 +29,6 @@ from gnuradio import network
 from gnuradio import soapy
 import rx_new_epy_block_0 as epy_block_0  # embedded python block
 import rx_new_epy_block_1 as epy_block_1  # embedded python block
-import rx_new_epy_module_0 as epy_module_0  # embedded python module
 import satellites.components.deframers
 import sip
 import threading
@@ -358,11 +357,11 @@ class rx_new(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
+        self.msg_connect((self.epy_block_0, 'out'), (self.blocks_message_debug_0_0, 'print'))
         self.msg_connect((self.epy_block_0, 'out'), (self.network_socket_pdu_0_1, 'pdus'))
         self.msg_connect((self.epy_block_1, 'out'), (self.network_socket_pdu_0_1, 'pdus'))
         self.msg_connect((self.satellites_ax25_deframer_1, 'out'), (self.blocks_message_debug_0, 'print'))
         self.msg_connect((self.satellites_ax25_deframer_1, 'out'), (self.epy_block_1, 'in'))
-        self.msg_connect((self.satellites_endurosat_deframer_1_0, 'out'), (self.blocks_message_debug_0_0, 'print'))
         self.msg_connect((self.satellites_endurosat_deframer_1_0, 'out'), (self.epy_block_0, 'in'))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.digital_symbol_sync_xx_0, 0))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.qtgui_time_sink_x_2, 0))
